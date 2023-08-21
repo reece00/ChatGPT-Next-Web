@@ -791,7 +791,7 @@ function _Chat() {
     deleteMessage(msgId);
   };
   
-  const onResend = (message: ChatMessage, a2: number) => {
+  const onResend = (message: ChatMessage, Delete: number) => {
     // when it is resending a message
     // 1. for a user's message, find the next bot response
     // 2. for a bot's message, find the last user's input
@@ -839,7 +839,7 @@ function _Chat() {
     deleteMessage(userMessage.id);
     deleteMessage(botMessage?.id);
 
-    if(onDelete == 1){
+    if(Delete == 1){
       return;
     }
     
