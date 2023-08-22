@@ -640,7 +640,7 @@ function _Chat() {
       );
       setInputRows(inputRows);
     },
-    300,
+    100,
     {
       leading: true,
       trailing: true,
@@ -715,7 +715,7 @@ function _Chat() {
         setUserInput(prompt.content);
       }
       inputRef.current?.focus();
-    }, 100);
+    }, 30);
   };
 
   // stop response
