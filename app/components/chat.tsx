@@ -940,8 +940,6 @@ function _Chat() {
     const isTouchTopEdge = e.scrollTop <= edgeThreshold;
     const isTouchBottomEdge = bottomHeight >= e.scrollHeight - edgeThreshold;
     const isHitBottom = bottomHeight >= e.scrollHeight - (isMobileScreen ? 0 : 10);
-console.log("bottomHeight:", bottomHeight, "scrollHeight:", e.scrollHeight, "isMobileScreen:", isMobileScreen);
-console.log("isHitBottom:", isHitBottom);
     const prevPageMsgIndex = msgRenderIndex - CHAT_PAGE_SIZE;
     const nextPageMsgIndex = msgRenderIndex + CHAT_PAGE_SIZE;
 
