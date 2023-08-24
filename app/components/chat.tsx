@@ -640,7 +640,7 @@ function _Chat() {
       );
       setInputRows(inputRows);
     },
-    300,
+    100,
     {
       leading: true,
       trailing: true,
@@ -715,7 +715,7 @@ function _Chat() {
         setUserInput(prompt.content);
       }
       inputRef.current?.focus();
-    }, 100);
+    }, 30);
   };
 
   // stop response
@@ -940,7 +940,8 @@ function _Chat() {
     const isTouchTopEdge = e.scrollTop <= edgeThreshold;
     const isTouchBottomEdge = bottomHeight >= e.scrollHeight - edgeThreshold;
     const isHitBottom = bottomHeight >= e.scrollHeight - (isMobileScreen ? 0 : 10);
-
+console.log("bottomHeight:", bottomHeight, "scrollHeight:", e.scrollHeight, "isMobileScreen:", isMobileScreen);
+console.log("isHitBottom:", isHitBottom);
     const prevPageMsgIndex = msgRenderIndex - CHAT_PAGE_SIZE;
     const nextPageMsgIndex = msgRenderIndex + CHAT_PAGE_SIZE;
 
