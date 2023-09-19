@@ -57,7 +57,7 @@ export function ModelConfigList(props: {
         <InputRange
           value={(props.modelConfig.top_p ?? 1).toFixed(1)}
           min="0"
-          max="1"
+          max="2"
           step="0.1"
           onChange={(e) => {
             props.updateConfig(
