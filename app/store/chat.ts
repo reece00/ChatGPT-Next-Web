@@ -493,7 +493,7 @@ export const useChatStore = create<ChatStore>()(
           messages.length % 12 === 0 &&
           countMessages(messages) >= SUMMARIZE_MIN_LEN
         ) {
-          const topicMessages = messages.concat(
+          let topicMessages = messages.concat(
             createMessage({
               role: "user",
               content: Locale.Store.Prompt.Topic,
@@ -505,9 +505,9 @@ export const useChatStore = create<ChatStore>()(
           let totalLength = 0;
           let discardedLength = 0;
           let messageCount = 0;
-          for (let i = messages.length - 1; i >= 0; i--) {
-            const message = messages[i];
-            const messageLength = message.content.length;
+          for (let i = topicMessages.length - 1; i >= 0; i--) {
+            const message = topicMessages[i];
+            const messageLength = topicMessages.content.length;
             totalLength += messageLength;
             messageCount++;
           
@@ -517,15 +517,12 @@ export const useChatStore = create<ChatStore>()(
             }
             if (totalLength > MAX_TOTAL_LENGTH) {
               discardedLength += messageLength;
-              messages.splice(i, 1);
+              topicMessages.splice(i, 1);
             }
           }
           
           console.log(`Total messages: ${messageCount}`);
           console.log(`Total discarded length: ${discardedLength}`);
-          
-          // 修改原变量
-          session.messages = messages;
           
           api.llm.chat({
             messages: topicMessages,
