@@ -490,8 +490,8 @@ export const useChatStore = create<ChatStore>()(
         if (
           config.enableAutoGenerateTitle &&
           session.topic === DEFAULT_TOPIC &&
-          messages.length % 12 === 0 &&
-          countMessages(messages) >= SUMMARIZE_MIN_LEN
+          countMessages(messages) >= SUMMARIZE_MIN_LEN ||
+          messages.length % 12 === 0
         ) {
           let topicMessages = messages.concat(
             createMessage({
