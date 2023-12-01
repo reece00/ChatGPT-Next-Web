@@ -490,6 +490,7 @@ export const useChatStore = create<ChatStore>()(
         if (
           config.enableAutoGenerateTitle &&
           session.topic === DEFAULT_TOPIC &&
+          messages.length % 12 === 0 &&
           countMessages(messages) >= SUMMARIZE_MIN_LEN
         ) {
           const topicMessages = messages.concat(
@@ -498,6 +499,34 @@ export const useChatStore = create<ChatStore>()(
               content: Locale.Store.Prompt.Topic,
             }),
           );
+          const MAX_TOTAL_LENGTH = 3500;
+
+          // 从尾部开始遍历数组，计算字符长度并丢弃超过最大长度的部分
+          let totalLength = 0;
+          let discardedLength = 0;
+          let messageCount = 0;
+          for (let i = messages.length - 1; i >= 0; i--) {
+            const message = messages[i];
+            const messageLength = message.content.length;
+            totalLength += messageLength;
+            messageCount++;
+          
+            console.log(`Message ${messageCount} length: ${messageLength}`);
+            if( messageCount > 6){
+             break; 
+            }
+            if (totalLength > MAX_TOTAL_LENGTH) {
+              discardedLength += messageLength;
+              messages.splice(i, 1);
+            }
+          }
+          
+          console.log(`Total messages: ${messageCount}`);
+          console.log(`Total discarded length: ${discardedLength}`);
+          
+          // 修改原变量
+          session.messages = messages;
+          
           api.llm.chat({
             messages: topicMessages,
             config: {
