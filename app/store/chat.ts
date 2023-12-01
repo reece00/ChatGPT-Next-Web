@@ -507,7 +507,7 @@ export const useChatStore = create<ChatStore>()(
           let messageCount = 0;
           for (let i = topicMessages.length - 1; i >= 0; i--) {
             const message = topicMessages[i];
-            const messageLength = topicMessages.content.length;
+            const messageLength = message.content.length;
             totalLength += messageLength;
             messageCount++;
           
