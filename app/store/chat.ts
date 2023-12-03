@@ -500,7 +500,7 @@ export const useChatStore = create<ChatStore>()(
             }),
           );
           const MAX_TOTAL_LENGTH = 3500;
-
+          console.log(`标题自动评估开始`);
           // 从尾部开始遍历数组，计算字符长度并丢弃超过最大长度的部分
           let totalLength = 0;
           let discardedLength = 0;
@@ -512,9 +512,6 @@ export const useChatStore = create<ChatStore>()(
             messageCount++;
           
             console.log(`Message ${messageCount} length: ${messageLength}`);
-            if( messageCount > 6){
-             break; 
-            }
             if (totalLength > MAX_TOTAL_LENGTH) {
               discardedLength += messageLength;
               topicMessages.splice(i, 1);
