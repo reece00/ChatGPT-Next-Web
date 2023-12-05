@@ -54,11 +54,11 @@ const cn = {
       Stop: "停止响应",
       ToBottom: "滚到最新",
       Theme: {
-        auto: "自动主题",
+        auto: "标题设置",
         light: "亮色模式",
         dark: "深色模式",
       },
-      Prompt: "快捷指令",
+      Prompt: "评估标题",
       Masks: "所有面具",
       Clear: "清除聊天",
       Settings: "对话设置",
