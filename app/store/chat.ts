@@ -79,7 +79,11 @@ function createEmptySession(): ChatSession {
     mask: createEmptyMask(),
   };
 }
-
+declare global {
+  interface Window {
+    myGlobalVar: any;
+  }
+}
 interface ChatStore {
   sessions: ChatSession[];
   currentSessionIndex: number;
@@ -487,11 +491,13 @@ export const useChatStore = create<ChatStore>()(
 
         // should summarize topic after chating more than 50 words
         const SUMMARIZE_MIN_LEN = 50;
+
         if (
-          config.enableAutoGenerateTitle &&
-          session.topic === DEFAULT_TOPIC &&
-          countMessages(messages) >= SUMMARIZE_MIN_LEN ||
-          messages.length % 12 === 0
+          (config.enableAutoGenerateTitle &&
+            session.topic === DEFAULT_TOPIC &&
+            countMessages(messages) >= SUMMARIZE_MIN_LEN) ||
+          messages.length % 12 === 0 ||
+          window.myGlobalVar == true
         ) {
           let topicMessages = messages.concat(
             createMessage({
@@ -499,28 +505,21 @@ export const useChatStore = create<ChatStore>()(
               content: Locale.Store.Prompt.Topic,
             }),
           );
-          const MAX_TOTAL_LENGTH = 3500;
           console.log(`标题自动评估开始`);
           // 从尾部开始遍历数组，计算字符长度并丢弃超过最大长度的部分
-          let totalLength = 0;
-          let discardedLength = 0;
           let messageCount = 0;
           for (let i = topicMessages.length - 1; i >= 0; i--) {
             const message = topicMessages[i];
-            const messageLength = message.content.length;
-            totalLength += messageLength;
-            messageCount++;
-          
-            console.log(`Message ${messageCount} length: ${messageLength}`);
-            if (totalLength > MAX_TOTAL_LENGTH) {
-              discardedLength += messageLength;
+
+            if (message.role != "user" || messageCount >= 2) {
+              messageCount++;
+
               topicMessages.splice(i, 1);
             }
           }
-          
-          console.log(`Total messages: ${messageCount}`);
-          console.log(`Total discarded length: ${discardedLength}`);
-          
+
+          console.log(`删除消息数: ${messageCount}`);
+
           api.llm.chat({
             messages: topicMessages,
             config: {
@@ -535,6 +534,7 @@ export const useChatStore = create<ChatStore>()(
             },
           });
         }
+        window.myGlobalVar == false;
 
         const modelConfig = session.mask.modelConfig;
         const summarizeIndex = Math.max(

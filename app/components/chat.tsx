@@ -480,7 +480,10 @@ export function ChatActions(props: {
       />
 
       <ChatAction
-        onClick={props.showPromptHints}
+        onClick={() => {
+          window.myGlobalVar = true;
+          chatStore.summarizeSession();
+        }}
         text={Locale.Chat.InputActions.Prompt}
         icon={<PromptIcon />}
       />
@@ -790,7 +793,7 @@ function _Chat() {
   const onDelete = (msgId: string) => {
     deleteMessage(msgId);
   };
-  
+
   const onResend = (message: ChatMessage, Delete: number) => {
     // when it is resending a message
     // 1. for a user's message, find the next bot response
@@ -839,10 +842,10 @@ function _Chat() {
     deleteMessage(userMessage.id);
     deleteMessage(botMessage?.id);
 
-    if(Delete == 1){
+    if (Delete == 1) {
       return;
     }
-    
+
     // resend the message
     setIsLoading(true);
     chatStore.onUserInput(userMessage.content).then(() => setIsLoading(false));
@@ -939,7 +942,8 @@ function _Chat() {
 
     const isTouchTopEdge = e.scrollTop <= edgeThreshold;
     const isTouchBottomEdge = bottomHeight >= e.scrollHeight - edgeThreshold;
-    const isHitBottom = bottomHeight >= e.scrollHeight - (isMobileScreen ? 0 : 10);
+    const isHitBottom =
+      bottomHeight >= e.scrollHeight - (isMobileScreen ? 0 : 10);
     const prevPageMsgIndex = msgRenderIndex - CHAT_PAGE_SIZE;
     const nextPageMsgIndex = msgRenderIndex + CHAT_PAGE_SIZE;
 
@@ -1114,7 +1118,6 @@ function _Chat() {
                 }
               >
                 <div className={styles["chat-message-container"]}>
-
                   {showTyping && (
                     <div className={styles["chat-message-status"]}>
                       {Locale.Chat.Typing}
@@ -1181,13 +1184,13 @@ function _Chat() {
                               <ChatAction
                                 text={Locale.Chat.Actions.Retry}
                                 icon={<ResetIcon />}
-                                onClick={() => onResend(message,0)}
+                                onClick={() => onResend(message, 0)}
                               />
 
                               <ChatAction
                                 text={Locale.Chat.Actions.Delete}
                                 icon={<DeleteIcon />}
-                                onClick={() => onResend(message,1)}
+                                onClick={() => onResend(message, 1)}
                               />
 
                               <ChatAction
