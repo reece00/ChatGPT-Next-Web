@@ -871,6 +871,7 @@ function _Chat() {
   const accessStore = useAccessStore();
 
   if (
+    1==2 &&
     context.length === 0 &&
     session.messages.at(0)?.content !== BOT_HELLO.content
   ) {
