@@ -62,6 +62,10 @@ You are ChatGPT, a large language model trained by OpenAI.`;
 
 export const DEFAULT_MODELS = [
   {
+    name: "gpt-4",
+    available: true,
+  },
+  {
     name: "gpt-4-1106",
     available: true,
   },
