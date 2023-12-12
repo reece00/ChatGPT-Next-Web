@@ -63,10 +63,10 @@ You are ChatGPT, a large language model trained by OpenAI.`;
 export const DEFAULT_MODELS = [
   {
     name: "gpt-4",
-    available: true,
+    available: false,
   },
   {
-    name: "gpt-4-1106",
+    name: "gpt-4-1106-preview",
     available: true,
   },
   {
@@ -78,23 +78,15 @@ export const DEFAULT_MODELS = [
     available: true,
   },
   {
-    name: "gpt-4-32k-0301",
-    available: true,
-  },
-   {
-    name: "gpt-4-32k-0613",
-    available: true,
-  },
-  {
     name: "gpt-3.5-turbo",
+    available: false,
+  },
+    {
+    name: "gpt-3.5-turbo-0301",
     available: true,
   },
   {
     name: "gpt-3.5-turbo-0613",
-    available: true,
-  },
-  {
-    name: "gpt-3.5-turbo-0301",
     available: true,
   },
    {
@@ -103,10 +95,6 @@ export const DEFAULT_MODELS = [
   },
   {
     name: "gpt-3.5-turbo-16k-0613",
-    available: true,
-  },
-  {
-    name: "gpt-3.5-turbo-16k-0301",
     available: true,
   },
 ] as const;
