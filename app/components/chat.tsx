@@ -464,31 +464,6 @@ export function ChatActions(props: {
       )}
 
       <ChatAction
-        onClick={nextTheme}
-        text={Locale.Chat.InputActions.Theme[theme]}
-        icon={
-          <>
-            {theme === Theme.Auto ? (
-              <AutoIcon />
-            ) : theme === Theme.Light ? (
-              <LightIcon />
-            ) : theme === Theme.Dark ? (
-              <DarkIcon />
-            ) : null}
-          </>
-        }
-      />
-
-      <ChatAction
-        onClick={() => {
-          window.myGlobalVar = true;
-          chatStore.summarizeSession();
-        }}
-        text={Locale.Chat.InputActions.Prompt}
-        icon={<PromptIcon />}
-      />
-
-      <ChatAction
         onClick={() => {
           navigate(Path.Masks);
         }}
@@ -535,10 +510,34 @@ export function ChatActions(props: {
           }}
         />
       )}
+
+      <ChatAction
+        onClick={() => {
+          showToast("开始评估标题");
+          window.myGlobalVar = true;
+          chatStore.summarizeSession();
+        }}
+        text={Locale.Chat.InputActions.Prompt}
+        icon={<PromptIcon />}
+      />
+
+      <ChatAction
+        onClick={handleClick}
+        text={"标题编辑"}
+        icon={<PromptIcon />}
+      />
+      <ChatAction
+        onClick={() => navigate(Path.Home)}
+        text={"返回主页"}
+        icon={<ReturnIcon />}
+      />
     </div>
   );
 }
-
+const myEvent = new CustomEvent("myEvent4687");
+const handleClick = () => {
+  document.dispatchEvent(myEvent);
+};
 export function EditMessageModal(props: { onClose: () => void }) {
   const chatStore = useChatStore();
   const session = chatStore.currentSession();

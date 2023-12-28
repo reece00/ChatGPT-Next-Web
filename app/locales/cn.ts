@@ -54,7 +54,7 @@ const cn = {
       Stop: "停止响应",
       ToBottom: "滚到最新",
       Theme: {
-        auto: "标题设置",
+        auto: "自动主题",
         light: "亮色模式",
         dark: "深色模式",
       },
