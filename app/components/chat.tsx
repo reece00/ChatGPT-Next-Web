@@ -520,12 +520,14 @@ export function ChatActions(props: {
         text={Locale.Chat.InputActions.Prompt}
         icon={<PromptIcon />}
       />
+      {useMobileScreen() && (
+        <ChatAction
+          onClick={handleClick}
+          text={"标题编辑"}
+          icon={<PromptIcon />}
+        />
+      )}
 
-      <ChatAction
-        onClick={handleClick}
-        text={"标题编辑"}
-        icon={<PromptIcon />}
-      />
       {useMobileScreen() && (
         <ChatAction
           onClick={() => navigate(Path.Home)}
