@@ -81,7 +81,7 @@ function createEmptySession(): ChatSession {
 }
 declare global {
   interface Window {
-    myGlobalVar: any;
+    EvaluationTitleMode: boolean;
   }
 }
 interface ChatStore {
@@ -497,7 +497,7 @@ export const useChatStore = create<ChatStore>()(
             session.topic === DEFAULT_TOPIC &&
             countMessages(messages) >= SUMMARIZE_MIN_LEN) ||
           messages.length % 12 === 0 ||
-          window.myGlobalVar == true
+          window.EvaluationTitleMode == true
         ) {
           let topicMessages = messages.concat(
             createMessage({
@@ -534,7 +534,7 @@ export const useChatStore = create<ChatStore>()(
             },
           });
         }
-        window.myGlobalVar == false;
+        window.EvaluationTitleMode == false;
 
         const modelConfig = session.mask.modelConfig;
         const summarizeIndex = Math.max(

@@ -514,7 +514,7 @@ export function ChatActions(props: {
       <ChatAction
         onClick={() => {
           showToast("开始评估标题");
-          window.myGlobalVar = true;
+          window.EvaluationTitleMode = true;
           chatStore.summarizeSession();
         }}
         text={Locale.Chat.InputActions.Prompt}
