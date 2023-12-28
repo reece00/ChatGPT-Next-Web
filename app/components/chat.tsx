@@ -526,11 +526,13 @@ export function ChatActions(props: {
         text={"标题编辑"}
         icon={<PromptIcon />}
       />
-      <ChatAction
-        onClick={() => navigate(Path.Home)}
-        text={"返回主页"}
-        icon={<ReturnIcon />}
-      />
+      {useMobileScreen() && (
+        <ChatAction
+          onClick={() => navigate(Path.Home)}
+          text={"返回主页"}
+          icon={<ReturnIcon />}
+        />
+      )}
     </div>
   );
 }
