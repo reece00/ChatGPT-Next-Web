@@ -1275,7 +1275,7 @@ function _Chat() {
                 width: "90px",
                 marginRight: "20px",
                 marginTop: "10px",
-                marginLeft: "10px",
+                marginLeft: "5px",
               }}
             >
               清空
