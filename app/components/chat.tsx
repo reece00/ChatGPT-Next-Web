@@ -1267,6 +1267,20 @@ function _Chat() {
             type="primary"
             onClick={() => doSubmit(userInput)}
           />
+          {useMobileScreen() && (
+            <button
+              onClick={() => onInput("")}
+              style={{
+                height: "40px",
+                width: "90px",
+                marginRight: "20px",
+                marginTop: "10px",
+                marginLeft: "10px",
+              }}
+            >
+              清空
+            </button>
+          )}
         </div>
       </div>
 
