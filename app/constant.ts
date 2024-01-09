@@ -58,7 +58,8 @@ export const OpenaiPath = {
 
 export const DEFAULT_INPUT_TEMPLATE = `{{input}}`; // input / time / model / lang
 export const DEFAULT_SYSTEM_TEMPLATE = `
-You are ChatGPT, a large language model trained by OpenAI.\mThe default user language is Simplified Chinese`;
+You are ChatGPT, a large language model trained by OpenAI.
+The default user language is Simplified Chinese`;
 
 export const DEFAULT_MODELS = [
   {
