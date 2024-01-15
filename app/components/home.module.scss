@@ -295,7 +295,7 @@
       opacity: 0.6;
     }
   }
-
+  
   .sidebar-tail {
     flex-direction: column-reverse;
     align-items: center;
@@ -311,11 +311,20 @@
     }
   }
 }
+.a222{
+  height: 70px;
 
+}
+.a1234 {
+  position: fixed;
+  bottom: 0px;
+  background-color: var(--second);
+  width: 90%;
+  }
 .sidebar-tail {
   display: flex;
   justify-content: space-between;
-  padding-top: 20px;
+  padding-top: 3px;
 }
 
 .sidebar-actions {

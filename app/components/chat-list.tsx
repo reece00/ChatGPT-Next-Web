@@ -32,13 +32,13 @@ export function ChatItem(props: {
   mask: Mask;
 }) {
   const draggableRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
+  /* useEffect(() => {
     if (props.selected && draggableRef.current) {
       draggableRef.current?.scrollIntoView({
         block: "center",
       });
     }
-  }, [props.selected]);
+  }, [props.selected]); */
   return (
     <Draggable draggableId={`${props.id}`} index={props.index}>
       {(provided) => (
@@ -153,6 +153,7 @@ export function ChatList(props: { narrow?: boolean }) {
               />
             ))}
             {provided.placeholder}
+            <div className={styles["a222"]}></div>
           </div>
         )}
       </Droppable>
