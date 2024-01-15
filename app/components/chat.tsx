@@ -427,7 +427,6 @@ export function ChatActions(props: {
       {props.hitBottom && (
         <ChatAction
           onClick={() => {
-            debugger;
             props.showPromptModal();
           }}
           text={Locale.Chat.InputActions.Settings}
@@ -495,8 +494,8 @@ export function ChatActions(props: {
       {useMobileScreen() && (
         <ChatAction
           onClick={handleClick}
-          text={"标题编辑"}
-          icon={<PromptIcon />}
+          text={"编辑标题"}
+          icon={<RenameIcon />}
         />
       )}
 
