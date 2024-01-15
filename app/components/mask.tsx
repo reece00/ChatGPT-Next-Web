@@ -31,7 +31,6 @@ import {
   Select,
   showConfirm,
 } from "./ui-lib";
-import { Avatar, AvatarPicker } from "./emoji";
 import Locale, { AllLangs, ALL_LANG_OPTIONS, Lang } from "../locales";
 import { useNavigate } from "react-router-dom";
 
@@ -56,14 +55,6 @@ function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
   return result;
-}
-
-export function MaskAvatar(props: { mask: Mask }) {
-  return props.mask.avatar !== DEFAULT_MASK_AVATAR ? (
-    <Avatar avatar={props.mask.avatar} />
-  ) : (
-    <Avatar model={props.mask.modelConfig.model} />
-  );
 }
 
 export function MaskConfig(props: {
@@ -107,24 +98,11 @@ export function MaskConfig(props: {
 
       <List>
         <ListItem title={Locale.Mask.Config.Avatar}>
-          <Popover
-            content={
-              <AvatarPicker
-                onEmojiClick={(emoji) => {
-                  props.updateMask((mask) => (mask.avatar = emoji));
-                  setShowPicker(false);
-                }}
-              ></AvatarPicker>
-            }
-            open={showPicker}
-            onClose={() => setShowPicker(false)}
-          >
+          <Popover open={showPicker} onClose={() => setShowPicker(false)}>
             <div
               onClick={() => setShowPicker(true)}
               style={{ cursor: "pointer" }}
-            >
-              <MaskAvatar mask={props.mask} />
-            </div>
+            ></div>
           </Popover>
         </ListItem>
         <ListItem title={Locale.Mask.Config.Name}>
@@ -518,9 +496,7 @@ export function MaskPage() {
             {masks.map((m) => (
               <div className={styles["mask-item"]} key={m.id}>
                 <div className={styles["mask-header"]}>
-                  <div className={styles["mask-icon"]}>
-                    <MaskAvatar mask={m} />
-                  </div>
+                  <div className={styles["mask-icon"]}></div>
                   <div className={styles["mask-title"]}>
                     <div className={styles["mask-name"]}>{m.name}</div>
                     <div className={styles["mask-info"] + " one-line"}>

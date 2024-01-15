@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { ChatMessage, useAppConfig, useChatStore } from "../store";
 import { Updater } from "../typing";
 import { IconButton } from "./button";
-import { Avatar } from "./emoji";
-import { MaskAvatar } from "./mask";
 import Locale from "../locales";
 
 import styles from "./message-selector.module.scss";
@@ -191,13 +189,7 @@ export function MessageSelector(props: {
                 onClickIndex(i);
               }}
             >
-              <div className={styles["avatar"]}>
-                {m.role === "user" ? (
-                  <Avatar avatar={config.avatar}></Avatar>
-                ) : (
-                  <MaskAvatar mask={session.mask} />
-                )}
-              </div>
+              <div className={styles["avatar"]}></div>
               <div className={styles["body"]}>
                 <div className={styles["date"]}>
                   {new Date(m.date).toLocaleString()}

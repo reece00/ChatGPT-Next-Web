@@ -81,8 +81,7 @@ import {
   Path,
   REQUEST_TIMEOUT_MS,
 } from "../constant";
-import { Avatar } from "./emoji";
-import { ContextPrompts, MaskAvatar, MaskConfig } from "./mask";
+import { ContextPrompts, MaskConfig } from "./mask";
 import { useMaskStore } from "../store/mask";
 import { ChatCommandPrefix, useChatCommand, useCommand } from "../command";
 import { prettyObject } from "../utils/format";
@@ -373,37 +372,6 @@ function ChatAction(props: {
   );
 }
 
-function useScrollToBottom() {
-  // for auto-scroll
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [autoScroll, setAutoScroll] = useState(true);
-
-  function scrollDomToBottom() {
-    const dom = scrollRef.current;
-    if (dom) {
-      requestAnimationFrame(() => {
-        setAutoScroll(true);
-        dom.scrollTo(0, dom.scrollHeight);
-      });
-    }
-  }
-
-  // auto scroll
-  useEffect(() => {
-    if (autoScroll) {
-      return;
-      scrollDomToBottom();
-    }
-  });
-
-  return {
-    scrollRef,
-    autoScroll,
-    setAutoScroll,
-    scrollDomToBottom,
-  };
-}
-
 export function ChatActions(props: {
   showPromptModal: () => void;
   scrollToBottom: () => void;
@@ -458,7 +426,10 @@ export function ChatActions(props: {
       )}
       {props.hitBottom && (
         <ChatAction
-          onClick={props.showPromptModal}
+          onClick={() => {
+            debugger;
+            props.showPromptModal();
+          }}
           text={Locale.Chat.InputActions.Settings}
           icon={<SettingsIcon />}
         />
@@ -518,7 +489,7 @@ export function ChatActions(props: {
           window.EvaluationTitleMode = true;
           chatStore.summarizeSession();
         }}
-        text={Locale.Chat.InputActions.Prompt}
+        text={"评估标题"}
         icon={<PromptIcon />}
       />
       {useMobileScreen() && (
@@ -619,7 +590,6 @@ function _Chat() {
   const [userInput, setUserInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { submitKey, shouldSubmit } = useSubmitHandler();
-  const { scrollRef, setAutoScroll, scrollDomToBottom } = useScrollToBottom();
   const [hitBottom, setHitBottom] = useState(true);
   const isMobileScreen = useMobileScreen();
   const navigate = useNavigate();
@@ -705,7 +675,6 @@ function _Chat() {
     setUserInput("");
     setPromptHints([]);
     if (!isMobileScreen) inputRef.current?.focus();
-    setAutoScroll(true);
   };
 
   const onPromptSelect = (prompt: RenderPompt) => {
@@ -879,9 +848,6 @@ function _Chat() {
     session.messages.at(0)?.content !== BOT_HELLO.content
   ) {
     const copiedHello = Object.assign({}, BOT_HELLO);
-    if (!accessStore.isAuthorized()) {
-      copiedHello.content = Locale.Error.Unauthorized;
-    }
     context.push(copiedHello);
   }
 
@@ -958,12 +924,10 @@ function _Chat() {
     }
 
     setHitBottom(isHitBottom);
-    setAutoScroll(isHitBottom);
   };
 
   function scrollToBottom() {
     setMsgRenderIndex(renderMessages.length - CHAT_PAGE_SIZE);
-    scrollDomToBottom();
   }
 
   // clear context index = context length + index in messages
@@ -1095,12 +1059,10 @@ function _Chat() {
 
       <div
         className={styles["chat-body"]}
-        ref={scrollRef}
         onScroll={(e) => onChatBodyScroll(e.currentTarget)}
         onMouseDown={() => inputRef.current?.blur()}
         onTouchStart={() => {
           inputRef.current?.blur();
-          setAutoScroll(false);
         }}
       >
         {messages.map((message, i) => {
@@ -1141,7 +1103,6 @@ function _Chat() {
                         setUserInput(message.content);
                       }}
                       fontSize={fontSize}
-                      parentRef={scrollRef}
                       defaultShow={i >= messages.length - 6}
                     />
                   </div>
@@ -1167,11 +1128,6 @@ function _Chat() {
                           }}
                         ></IconButton>
                       </div>
-                      {isUser ? (
-                        <Avatar avatar={config.avatar} />
-                      ) : (
-                        <MaskAvatar mask={session.mask} />
-                      )}
                     </div>
 
                     {showActions && (
