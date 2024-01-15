@@ -98,7 +98,11 @@ export function MaskConfig(props: {
 
       <List>
         <ListItem title={Locale.Mask.Config.Avatar}>
-          <Popover open={showPicker} onClose={() => setShowPicker(false)}>
+          <Popover
+            open={showPicker}
+            onClose={() => setShowPicker(false)}
+            content={<div>Popover Content</div>}
+          >
             <div
               onClick={() => setShowPicker(true)}
               style={{ cursor: "pointer" }}
