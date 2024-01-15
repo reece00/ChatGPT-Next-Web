@@ -391,6 +391,7 @@ function useScrollToBottom() {
   // auto scroll
   useEffect(() => {
     if (autoScroll) {
+      return;
       scrollDomToBottom();
     }
   });
