@@ -285,7 +285,7 @@
 }
 
 .chat-message-header {
-  margin-top: 20px;
+  margin-top: 5px;
   display: flex;
   align-items: center;
 
@@ -309,6 +309,7 @@
 }
 
 .chat-message-container {
+  
   max-width: var(--message-max-width);
   display: flex;
   flex-direction: column;
@@ -387,7 +388,7 @@
   white-space: nowrap;
   transition: all ease 0.6s;
   color: var(--black);
-  text-align: right;
+  //text-align: right;
   width: 100%;
   box-sizing: border-box;
   padding-right: 10px;
