@@ -1144,6 +1144,15 @@ function _Chat() {
                       defaultShow={i >= messages.length - 6}
                     />
                   </div>
+
+                  <div className={styles["chat-message-action-date"]}>
+                    {"字数:" + message.content.length + "    "}
+
+                    {message.model ? message.model + "   " : ""}
+                    {isContext
+                      ? Locale.Chat.IsContext
+                      : message.date.toLocaleString()}
+                  </div>
                   <div className={styles["chat-message-header"]}>
                     <div className={styles["chat-message-avatar"]}>
                       <div className={styles["chat-message-edit"]}>
@@ -1206,14 +1215,6 @@ function _Chat() {
                         </div>
                       </div>
                     )}
-                  </div>
-                  <div className={styles["chat-message-action-date"]}>
-                    {"字数:" + message.content.length + "    "}
-
-                    {message.model ? message.model + "   " : ""}
-                    {isContext
-                      ? Locale.Chat.IsContext
-                      : message.date.toLocaleString()}
                   </div>
                 </div>
               </div>
