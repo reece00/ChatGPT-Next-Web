@@ -1146,9 +1146,9 @@ function _Chat() {
                   </div>
 
                   <div className={styles["chat-message-action-date"]}>
-                    {"字数:" + message.content.length + "    "}
+                    {"字数:" + message.content.length + "     "}
 
-                    {message.model ? message.model + "   " : ""}
+                    {message.model ? message.model + "  " : ""}
                     {isContext
                       ? Locale.Chat.IsContext
                       : message.date.toLocaleString()}
