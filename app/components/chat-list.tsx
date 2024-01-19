@@ -150,7 +150,6 @@ export function ChatList(props: { narrow?: boolean }) {
               />
             ))}
             {provided.placeholder}
-            <div className={styles["a222"]}></div>
           </div>
         )}
       </Droppable>
