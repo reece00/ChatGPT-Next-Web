@@ -118,45 +118,43 @@ export function SideBar(props: { className?: string }) {
     >
       <ChatList narrow={shouldNarrow} />
 
-      <div className={styles["a1234"]}>
-        <div className={styles["sidebar-tail"]}>
-          <div className={styles["sidebar-actions"]}>
-            <div className={styles["sidebar-action"] + " " + styles.mobile}>
-              <IconButton
-                icon={<CloseIcon />}
-                onClick={async () => {
-                  if (await showConfirm(Locale.Home.DeleteChat)) {
-                    chatStore.deleteSession(chatStore.currentSessionIndex);
-                  }
-                }}
-              />
-            </div>
-            <div className={styles["sidebar-action"]}>
-              <Link to={Path.Settings}>
-                <IconButton icon={<SettingsIcon />} shadow />
-              </Link>
-            </div>
-            <div className={styles["sidebar-action"]}>
-              <a href={REPO_URL} target="_blank">
-                <IconButton icon={<GithubIcon />} shadow />
-              </a>
-            </div>
-          </div>
-          <div>
+      <div className={styles["sidebar-tail"]}>
+        <div className={styles["sidebar-actions"]}>
+          <div className={styles["sidebar-action"] + " " + styles.mobile}>
             <IconButton
-              icon={<AddIcon />}
-              text={shouldNarrow ? undefined : Locale.Home.NewChat}
-              onClick={() => {
-                if (config.dontShowMaskSplashScreen) {
-                  chatStore.newSession();
-                  navigate(Path.Chat);
-                } else {
-                  navigate(Path.NewChat);
+              icon={<CloseIcon />}
+              onClick={async () => {
+                if (await showConfirm(Locale.Home.DeleteChat)) {
+                  chatStore.deleteSession(chatStore.currentSessionIndex);
                 }
               }}
-              shadow
             />
           </div>
+          <div className={styles["sidebar-action"]}>
+            <Link to={Path.Settings}>
+              <IconButton icon={<SettingsIcon />} shadow />
+            </Link>
+          </div>
+          <div className={styles["sidebar-action"]}>
+            <a href={REPO_URL} target="_blank">
+              <IconButton icon={<GithubIcon />} shadow />
+            </a>
+          </div>
+        </div>
+        <div>
+          <IconButton
+            icon={<AddIcon />}
+            text={shouldNarrow ? undefined : Locale.Home.NewChat}
+            onClick={() => {
+              if (config.dontShowMaskSplashScreen) {
+                chatStore.newSession();
+                navigate(Path.Chat);
+              } else {
+                navigate(Path.NewChat);
+              }
+            }}
+            shadow
+          />
         </div>
       </div>
     </div>
