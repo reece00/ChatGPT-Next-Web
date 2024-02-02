@@ -436,7 +436,9 @@ export function showImageModal(img: string) {
     ),
   });
 }
-
+const customSort = (a: { title: string }, b: { title: string }) => {
+  return a.title.localeCompare(b.title);
+};
 export function Selector<T>(props: {
   items: Array<{
     title: string;
@@ -452,7 +454,7 @@ export function Selector<T>(props: {
     <div className={styles["selector"]} onClick={() => props.onClose?.()}>
       <div className={styles["selector-content"]}>
         <List>
-          {props.items.map((item, i) => {
+          {props.items.sort(customSort).map((item, i) => {
             const selected = props.defaultSelectedValue === item.value;
             return (
               <ListItem
