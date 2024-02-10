@@ -59,7 +59,7 @@ export function ChatItem(props: {
 
           // 在这里执行你的函数
           window.scrollTo(0, parseInt(scrollPosition, 10));
-        }, 20);
+        }, 50);
       }
     } else {
       console.log("储存滚动位置" + window.scrollY.toString());
