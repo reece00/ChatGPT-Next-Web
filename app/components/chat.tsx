@@ -1193,22 +1193,25 @@ function _Chat() {
                                 icon={<ResetIcon />}
                                 onClick={() => onResend(message, 0)}
                               />
-
                               <ChatAction
-                                text={Locale.Chat.Actions.Delete}
-                                icon={<DeleteIcon />}
-                                onClick={() => onResend(message, 1)}
+                                text={Locale.Chat.Actions.Copy}
+                                icon={<CopyIcon />}
+                                onClick={() => copyToClipboard(message.content)}
                               />
 
                               <ChatAction
                                 text={Locale.Chat.Actions.Pin}
                                 icon={<PinIcon />}
-                                onClick={() => onPinMessage(message)}
+                                onClick={async () => {
+                                  if (await showConfirm("确定固定对话内容？")) {
+                                    onPinMessage(message);
+                                  }
+                                }}
                               />
                               <ChatAction
-                                text={Locale.Chat.Actions.Copy}
-                                icon={<CopyIcon />}
-                                onClick={() => copyToClipboard(message.content)}
+                                text={Locale.Chat.Actions.Delete}
+                                icon={<DeleteIcon />}
+                                onClick={() => onResend(message, 1)}
                               />
                             </>
                           )}
