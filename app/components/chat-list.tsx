@@ -18,6 +18,8 @@ import { Mask } from "../store/mask";
 import { useRef, useEffect } from "react";
 import { showConfirm } from "./ui-lib";
 
+import { useLocation } from "react-router-dom";
+
 export function ChatItem(props: {
   onClick?: () => void;
   onDelete?: () => void;
@@ -32,12 +34,40 @@ export function ChatItem(props: {
 }) {
   const draggableRef = useRef<HTMLDivElement | null>(null);
   /* useEffect(() => {
+      console.debug("执行滚动对话条");
+
     if (props.selected && draggableRef.current) {
       draggableRef.current?.scrollIntoView({
         block: "center",
       });
     }
-  }, [props.selected]); */
+  }, [props.selected]);  */
+
+  const location = useLocation();
+
+  useEffect(() => {
+    // 这里是你想在路径变化时执行的函数
+    console.debug("路由变化了", location.pathname);
+    if (location.pathname === "/") {
+      const scrollPosition = sessionStorage.getItem("scrollPosition");
+
+      if (scrollPosition) {
+        const timer = setTimeout(() => {
+          console.debug(
+            "执行滚动对话条" + scrollPosition + draggableRef.current,
+          );
+
+          // 在这里执行你的函数
+          window.scrollTo(0, parseInt(scrollPosition, 10));
+        }, 20);
+      }
+    } else {
+      console.log("储存滚动位置" + window.scrollY.toString());
+      sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+    }
+    // 依赖项数组中包含location，这样每当location变化时，useEffect都会重新执行
+  }, [location]);
+
   return (
     <Draggable draggableId={`${props.id}`} index={props.index}>
       {(provided) => (

@@ -377,7 +377,7 @@ function useScrollToBottom() {
   const [autoScroll, setAutoScroll] = useState(true);
 
   function scrollDomToBottom() {
-    console.log("测试1");
+    console.debug("执行滚动底部");
     const dom = scrollRef.current;
     if (dom) {
       requestAnimationFrame(() => {
