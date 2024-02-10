@@ -115,6 +115,10 @@ export function SideBar(props: { className?: string }) {
       className={`${styles.sidebar} ${props.className} ${
         shouldNarrow && styles["narrow-sidebar"]
       }`}
+      style={{
+        // #3016 disable transition on ios mobile screen
+        transition: useMobileScreen() ? "none" : undefined,
+      }}
     >
       <ChatList narrow={shouldNarrow} />
 
