@@ -46,27 +46,22 @@ export function ChatItem(props: {
   const location = useLocation();
 
   useEffect(() => {
-    // 这里是你想在路径变化时执行的函数
+    handleRouteChange();
+  }, [location]);
+  useEffect(() => {
+    handleRouteChange();
+  }, []);
+
+  function handleRouteChange() {
     console.debug("路由变化了", location.pathname);
     if (location.pathname === "/") {
       const scrollPosition = sessionStorage.getItem("scrollPosition");
-
       if (scrollPosition) {
-        const timer = setTimeout(() => {
-          console.debug(
-            "执行滚动对话条" + scrollPosition + draggableRef.current,
-          );
-
-          // 在这里执行你的函数
-          window.scrollTo(0, parseInt(scrollPosition, 10));
-        }, 50);
+        console.debug("执行滚动对话条" + scrollPosition + draggableRef.current);
+        window.scrollTo(0, parseInt(scrollPosition, 10));
       }
-    } else {
-      console.log("储存滚动位置" + window.scrollY.toString());
-      sessionStorage.setItem("scrollPosition", window.scrollY.toString());
     }
-    // 依赖项数组中包含location，这样每当location变化时，useEffect都会重新执行
-  }, [location]);
+  }
 
   return (
     <Draggable draggableId={`${props.id}`} index={props.index}>
@@ -164,6 +159,11 @@ export function ChatList(props: { narrow?: boolean }) {
                 index={i}
                 selected={i === selectedIndex}
                 onClick={() => {
+                  console.log("储存滚动位置" + window.scrollY.toString());
+                  sessionStorage.setItem(
+                    "scrollPosition",
+                    window.scrollY.toString(),
+                  );
                   navigate(Path.Chat);
                   selectSession(i);
                 }}
