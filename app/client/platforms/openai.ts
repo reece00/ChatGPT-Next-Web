@@ -66,12 +66,16 @@ export class ChatGPTApi implements LLMApi {
       messages,
       stream: options.config.stream,
       model: modelConfig.model,
-      temperature: modelConfig.temperature,
+      temperature:
+        options.config.temperature != 1 &&
+        options.config.temperature != undefined
+          ? options.config.temperature
+          : modelConfig.temperature,
       presence_penalty: modelConfig.presence_penalty,
       frequency_penalty: modelConfig.frequency_penalty,
       top_p: modelConfig.top_p,
     };
-
+    console.log(options.config.temperature);
     console.log("[Request] openai payload: ", requestPayload);
 
     const shouldStream = !!options.config.stream;

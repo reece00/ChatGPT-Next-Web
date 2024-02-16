@@ -499,30 +499,41 @@ export const useChatStore = create<ChatStore>()(
           messages.length % 12 === 0 ||
           window.EvaluationTitleMode == true
         ) {
-          let topicMessages = messages.concat(
-            createMessage({
-              role: "user",
-              content: Locale.Store.Prompt.Topic,
-            }),
-          );
+          let topicMessages = [...messages];
           console.log(`标题自动评估开始`);
           // 从尾部开始遍历数组，计算字符长度并丢弃超过最大长度的部分
           let messageCount = 0;
           for (let i = topicMessages.length - 1; i >= 0; i--) {
+            console.log("测试数组" + session.mask.context.length);
             const message = topicMessages[i];
-
-            if (message.role != "user" || messageCount >= 2) {
+            if (message.role == "user") {
               messageCount++;
-
+              if (messageCount >= 2) {
+                topicMessages.splice(i, 1);
+              }
+            } else {
               topicMessages.splice(i, 1);
             }
           }
+          topicMessages.push(
+            createMessage({
+              role: "system",
+              content: Locale.Store.Prompt.Topic,
+            }),
+          );
 
+          console.log("全部消息", messages);
+          console.log("固定消息", session.mask.context);
           console.log(`删除消息数: ${messageCount}`);
+
+          topicMessages.unshift(...session.mask.context);
+
+          console.log("发送消息", topicMessages);
 
           api.llm.chat({
             messages: topicMessages,
             config: {
+              temperature: 0.3,
               model: "gpt-3.5-turbo",
             },
             onFinish(message) {
