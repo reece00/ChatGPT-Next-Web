@@ -196,7 +196,7 @@ export const useChatStore = create<ChatStore>()(
               ...mask.modelConfig,
             },
           };
-          session.topic = mask.name;
+          //session.topic = mask.name;
         }
 
         set((state) => ({
