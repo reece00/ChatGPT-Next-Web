@@ -144,6 +144,15 @@ export function SideBar(props: { className?: string }) {
               <IconButton icon={<GithubIcon />} shadow />
             </a>
           </div>
+          <div className={styles["sidebar-action"]}>
+          <IconButton
+            icon={<GithubIcon />}
+            shadow
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent("TampermonkeyTrigger4387", { detail: { action: "runTask" } }));
+            }}
+          />
+        </div>
         </div>
         <div>
           <IconButton
