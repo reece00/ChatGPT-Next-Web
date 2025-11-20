@@ -107,8 +107,7 @@ import {
   UNFINISHED_INPUT,
   CACHE_URL_PREFIX,
 } from "../constant";
-import { Avatar } from "./emoji";
-import { ContextPrompts, MaskAvatar, MaskConfig } from "./mask";
+import { ContextPrompts, MaskConfig } from "./mask";
 import { useMaskStore } from "../store/mask";
 import { ChatCommandPrefix, useChatCommand, useCommand } from "../command";
 import { prettyObject } from "../utils/format";
@@ -1943,29 +1942,7 @@ function _Chat() {
                                   }}
                                 ></IconButton>
                               </div>
-                              {isUser ? (
-                                <Avatar avatar={config.avatar} />
-                              ) : (
-                                <>
-                                  {["system"].includes(message.role) ? (
-                                    <Avatar avatar="2699-fe0f" />
-                                  ) : (
-                                    <MaskAvatar
-                                      avatar={session.mask.avatar}
-                                      model={
-                                        message.model ||
-                                        session.mask.modelConfig.model
-                                      }
-                                    />
-                                  )}
-                                </>
-                              )}
                             </div>
-                            {!isUser && (
-                              <div className={styles["chat-model-name"]}>
-                                {message.model}
-                              </div>
-                            )}
 
                             {showActions && (
                               <div className={styles["chat-message-actions"]}>
@@ -2056,7 +2033,7 @@ function _Chat() {
                               : `${message.date.toLocaleString()} · ${
                                   !isUser && message.model
                                     ? message.model + " · "
-                                    : ""
+                                    : "字数："
                                 }${getMessageTextContent(message).length}`}
                           </div>
                         </div>
