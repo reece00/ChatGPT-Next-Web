@@ -125,7 +125,8 @@
     left: -100%;
     z-index: 1000;
     height: var(--full-height);
-    transition: none;
+    transition: all ease 0.3s;
+    overflow: auto;
     box-shadow: none;
   }
 

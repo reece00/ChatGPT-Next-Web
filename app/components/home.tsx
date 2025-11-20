@@ -174,6 +174,40 @@ function Screen() {
     loadAsyncGoogleFont();
   }, []);
 
+  // Restore mobile scroll position when returning to home; save when leaving home
+  useEffect(() => {
+    const SCROLL_KEY = "mobile_home_scroll_y";
+    const SIDEBAR_SCROLL_KEY = "mobile_home_sidebar_scroll";
+    if (!isMobileScreen) return;
+
+    if (isHome) {
+      const y = Number(sessionStorage.getItem(SCROLL_KEY) || "0");
+      const sTop = Number(sessionStorage.getItem(SIDEBAR_SCROLL_KEY) || "0");
+      // restore on next frame to ensure layout is ready
+      requestAnimationFrame(() => {
+        try {
+          const sidebar = document.querySelector(
+            `.${styles["sidebar"]}`,
+          ) as HTMLElement | null;
+          if (sidebar) {
+            sidebar.scrollTop = sTop;
+          } else {
+            window.scrollTo({ top: y, behavior: "auto" });
+          }
+        } catch {}
+      });
+    } else {
+      try {
+        const sidebar = document.querySelector(
+          `.${styles["sidebar"]}`,
+        ) as HTMLElement | null;
+        const sTop = sidebar ? sidebar.scrollTop : 0;
+        sessionStorage.setItem(SIDEBAR_SCROLL_KEY, String(sTop));
+        sessionStorage.setItem(SCROLL_KEY, String(window.scrollY || 0));
+      } catch {}
+    }
+  }, [isHome, isMobileScreen]);
+
   if (isArtifact) {
     return (
       <Routes>
