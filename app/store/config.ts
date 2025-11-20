@@ -204,17 +204,21 @@ export const useAppConfig = createPersistStore(
     },
 
     merge(persistedState, currentState) {
-      const state = persistedState as ChatConfig | undefined;
+      const state = persistedState as Partial<ChatConfig> | undefined;
       if (!state) return { ...currentState };
+
+      // Merge models only when persisted payload contains models
       const models = currentState.models.slice();
-      state.models.forEach((pModel) => {
+      (state.models ?? []).forEach((pModel) => {
         const idx = models.findIndex(
           (v) => v.name === pModel.name && v.provider === pModel.provider,
         );
         if (idx !== -1) models[idx] = pModel;
         else models.push(pModel);
       });
-      return { ...currentState, ...state, models: models };
+
+      // Spread persisted state (which may be partial due to `partialize`) over current state
+      return { ...currentState, ...(state as ChatConfig), models };
     },
 
     migrate(persistedState, version) {
