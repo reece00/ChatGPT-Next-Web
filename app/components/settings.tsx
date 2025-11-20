@@ -614,16 +614,20 @@ export function Settings() {
             title={Locale.Settings.CustomModel.Title}
             subTitle={Locale.Settings.CustomModel.SubTitle}
           >
-            <input
-              type="text"
+            <textarea
+              rows={3}
               value={config.customModels}
               placeholder="model1,model2,model3"
-              onChange={(e) =>
+              onInput={(e) =>
                 config.update(
-                  (config) => (config.customModels = e.currentTarget.value),
+                  (config) =>
+                    (config.customModels = (
+                      e.currentTarget as HTMLTextAreaElement
+                    ).value),
                 )
               }
-            ></input>
+              style={{ width: "100%", maxWidth: "unset", textAlign: "left" }}
+            ></textarea>
           </ListItem>
         </List>
 

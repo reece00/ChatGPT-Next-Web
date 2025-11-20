@@ -100,9 +100,18 @@ export class ChatGPTApi implements LLMApi {
       if (shouldStream) {
         let responseText = "";
         let finished = false;
+        // throttle UI updates to ~80ms
+        let lastUpdateTime = 0;
+        let remainText = "";
 
         const finish = () => {
           if (!finished) {
+            // flush any remaining buffered text before finishing
+            if (remainText && remainText.length > 0) {
+              responseText += remainText;
+              options.onUpdate?.(responseText, remainText);
+              remainText = "";
+            }
             options.onFinish(responseText);
             finished = true;
           }
@@ -161,8 +170,20 @@ export class ChatGPTApi implements LLMApi {
               const json = JSON.parse(text);
               const delta = json.choices[0].delta.content;
               if (delta) {
-                responseText += delta;
-                options.onUpdate?.(responseText, delta);
+                // buffer delta and emit throttled updates
+                remainText += delta;
+                const now = Date.now();
+                if (remainText.length > 0 && now - lastUpdateTime >= 80) {
+                  const fetchCount = Math.max(
+                    1,
+                    Math.round(remainText.length / 60),
+                  );
+                  const fetchText = remainText.slice(0, fetchCount);
+                  responseText += fetchText;
+                  remainText = remainText.slice(fetchCount);
+                  lastUpdateTime = now;
+                  options.onUpdate?.(responseText, fetchText);
+                }
               }
             } catch (e) {
               console.error("[Request] parse error", text, msg);
