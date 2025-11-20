@@ -689,18 +689,12 @@ export function ChatActions(props: {
                 session.mask.modelConfig.providerName = ServiceProvider.OpenAI;
                 session.mask.syncGlobalConfig = false;
               });
-              // 保留提示逻辑，但不依赖非 OpenAI 提供商
-              const providerName = "OpenAI";
-              if (providerName == "ByteDance") {
-                const selectedModel = models.find(
-                  (m) =>
-                    m.name == model &&
-                    m?.provider?.providerName == providerName,
-                );
-                showToast(selectedModel?.displayName ?? "");
-              } else {
-                showToast(model);
-              }
+              const selectedModel = models.find(
+                (m) =>
+                  m.name == model &&
+                  (!m?.provider || m?.provider?.providerName === "OpenAI"),
+              );
+              showToast(selectedModel?.displayName ?? model);
             }}
           />
         )}
