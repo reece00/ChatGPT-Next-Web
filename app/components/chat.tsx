@@ -119,7 +119,6 @@ import { createTTSPlayer } from "../utils/audio";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "../utils/ms_edge_tts";
 
 import { isEmpty } from "lodash-es";
-import { getModelProvider } from "../utils/model";
 import { RealtimeChat } from "@/app/components/realtime-chat";
 import clsx from "clsx";
 import { getAvailableClientsCount, isMcpEnabled } from "../mcp/actions";
@@ -544,13 +543,9 @@ export function ChatActions(props: {
     }
   }, [allModels]);
   const currentModelName = useMemo(() => {
-    const model = models.find(
-      (m) =>
-        m.name == currentModel &&
-        m?.provider?.providerName == currentProviderName,
-    );
-    return model?.displayName ?? "";
-  }, [models, currentModel, currentProviderName]);
+    const model = models.find((m) => m.name == currentModel);
+    return model?.displayName ?? currentModel;
+  }, [models, currentModel]);
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [showPluginSelector, setShowPluginSelector] = useState(false);
   const [showUploadImage, setShowUploadImage] = useState(false);
@@ -670,30 +665,22 @@ export function ChatActions(props: {
 
         {showModelSelector && (
           <Selector
-            defaultSelectedValue={`${currentModel}@${currentProviderName}`}
+            defaultSelectedValue={currentModel}
             items={models.map((m) => ({
-              title: `${m.displayName}${
-                m?.provider?.providerName
-                  ? " (" + m?.provider?.providerName + ")"
-                  : ""
-              }`,
-              value: `${m.name}@${m?.provider?.providerName}`,
+              title: m.displayName,
+              value: m.name,
             }))}
             onClose={() => setShowModelSelector(false)}
             onSelection={(s) => {
               if (s.length === 0) return;
-              const [model] = getModelProvider(s[0]);
+              const model = s[0];
               chatStore.updateTargetSession(session, (session) => {
                 session.mask.modelConfig.model = model as ModelType;
                 // 强制使用 OpenAI 提供商，忽略选择串中的 provider
                 session.mask.modelConfig.providerName = ServiceProvider.OpenAI;
                 session.mask.syncGlobalConfig = false;
               });
-              const selectedModel = models.find(
-                (m) =>
-                  m.name == model &&
-                  (!m?.provider || m?.provider?.providerName === "OpenAI"),
-              );
+              const selectedModel = models.find((m) => m.name == model);
               showToast(selectedModel?.displayName ?? model);
             }}
           />
