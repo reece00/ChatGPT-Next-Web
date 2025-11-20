@@ -100,7 +100,7 @@ export class ChatGPTApi implements LLMApi {
       if (shouldStream) {
         let responseText = "";
         let finished = false;
-        // throttle UI updates to ~80ms
+        // throttle UI updates to ~50ms
         let lastUpdateTime = 0;
         let remainText = "";
 
@@ -173,16 +173,12 @@ export class ChatGPTApi implements LLMApi {
                 // buffer delta and emit throttled updates
                 remainText += delta;
                 const now = Date.now();
-                if (remainText.length > 0 && now - lastUpdateTime >= 80) {
-                  const fetchCount = Math.max(
-                    1,
-                    Math.round(remainText.length / 60),
-                  );
-                  const fetchText = remainText.slice(0, fetchCount);
-                  responseText += fetchText;
-                  remainText = remainText.slice(fetchCount);
+                if (remainText.length > 0 && now - lastUpdateTime >= 50) {
+                  const flushedText = remainText;
+                  responseText += flushedText;
+                  remainText = "";
                   lastUpdateTime = now;
-                  options.onUpdate?.(responseText, fetchText);
+                  options.onUpdate?.(responseText, flushedText);
                 }
               }
             } catch (e) {
