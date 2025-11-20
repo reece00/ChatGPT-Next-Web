@@ -64,10 +64,8 @@ export function collectModelTable(
     }
   > = {};
 
-  // default models：仅保留 OpenAI 提供商或未标注提供商的模型
+  // default models：保留所有模型项；在选择时统一强制使用 OpenAI 提供商
   models.forEach((m) => {
-    const providerName = m?.provider?.providerName;
-    if (providerName && providerName !== "OpenAI") return;
     const key = `${m.name}@${m?.provider?.id}`;
     modelTable[key] = {
       ...m,
@@ -171,9 +169,7 @@ export function collectModels(
   customModels: string,
 ) {
   const modelTable = collectModelTable(models, customModels);
-  let allModels = Object.values(modelTable).filter(
-    (m) => !m.provider || m?.provider?.providerName === "OpenAI",
-  );
+  let allModels = Object.values(modelTable);
   allModels = sortModelTable(allModels);
   return allModels;
 }
@@ -188,9 +184,7 @@ export function collectModelsWithDefaultModel(
     customModels,
     defaultModel,
   );
-  let allModels = Object.values(modelTable).filter(
-    (m) => !m.provider || m?.provider?.providerName === "OpenAI",
-  );
+  let allModels = Object.values(modelTable);
   allModels = sortModelTable(allModels);
   return allModels;
 }
