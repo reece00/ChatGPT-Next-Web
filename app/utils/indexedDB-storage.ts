@@ -17,10 +17,6 @@ class IndexedDBStorage implements StateStorage {
   public async setItem(name: string, value: string): Promise<void> {
     try {
       const _value = JSON.parse(value);
-      if (!_value?.state?._hasHydrated) {
-        console.warn("skip setItem", name);
-        return;
-      }
       // Avoid redundant writes when only hydration markers or timestamps change
       try {
         const old = await get(name);
