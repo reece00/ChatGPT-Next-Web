@@ -231,20 +231,8 @@ export const useAccessStore = createPersistStore(
 
       // has token or has code or disabled access control
       return (
+        // 仅允许 OpenAI 授权通过；其他提供商不计入授权判断
         this.isValidOpenAI() ||
-        this.isValidAzure() ||
-        this.isValidGoogle() ||
-        this.isValidAnthropic() ||
-        this.isValidBaidu() ||
-        this.isValidByteDance() ||
-        this.isValidAlibaba() ||
-        this.isValidTencent() ||
-        this.isValidMoonshot() ||
-        this.isValidIflytek() ||
-        this.isValidDeepSeek() ||
-        this.isValidXAI() ||
-        this.isValidChatGLM() ||
-        this.isValidSiliconFlow() ||
         !this.enabledAccessControl() ||
         (this.enabledAccessControl() && ensure(get(), ["accessCode"]))
       );

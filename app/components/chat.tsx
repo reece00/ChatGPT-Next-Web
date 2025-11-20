@@ -682,13 +682,15 @@ export function ChatActions(props: {
             onClose={() => setShowModelSelector(false)}
             onSelection={(s) => {
               if (s.length === 0) return;
-              const [model, providerName] = getModelProvider(s[0]);
+              const [model] = getModelProvider(s[0]);
               chatStore.updateTargetSession(session, (session) => {
                 session.mask.modelConfig.model = model as ModelType;
-                session.mask.modelConfig.providerName =
-                  providerName as ServiceProvider;
+                // 强制使用 OpenAI 提供商，忽略选择串中的 provider
+                session.mask.modelConfig.providerName = ServiceProvider.OpenAI;
                 session.mask.syncGlobalConfig = false;
               });
+              // 保留提示逻辑，但不依赖非 OpenAI 提供商
+              const providerName = "OpenAI";
               if (providerName == "ByteDance") {
                 const selectedModel = models.find(
                   (m) =>

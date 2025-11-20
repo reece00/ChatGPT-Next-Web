@@ -64,12 +64,14 @@ export function collectModelTable(
     }
   > = {};
 
-  // default models
+  // default models：仅保留 OpenAI 提供商或未标注提供商的模型
   models.forEach((m) => {
-    // using <modelName>@<providerId> as fullName
-    modelTable[`${m.name}@${m?.provider?.id}`] = {
+    const providerName = m?.provider?.providerName;
+    if (providerName && providerName !== "OpenAI") return;
+    const key = `${m.name}@${m?.provider?.id}`;
+    modelTable[key] = {
       ...m,
-      displayName: m.name, // 'provider' is copied over if it exists
+      displayName: m.name,
     };
   });
 
@@ -169,10 +171,10 @@ export function collectModels(
   customModels: string,
 ) {
   const modelTable = collectModelTable(models, customModels);
-  let allModels = Object.values(modelTable);
-
+  let allModels = Object.values(modelTable).filter(
+    (m) => !m.provider || m?.provider?.providerName === "OpenAI",
+  );
   allModels = sortModelTable(allModels);
-
   return allModels;
 }
 
@@ -186,10 +188,10 @@ export function collectModelsWithDefaultModel(
     customModels,
     defaultModel,
   );
-  let allModels = Object.values(modelTable);
-
+  let allModels = Object.values(modelTable).filter(
+    (m) => !m.provider || m?.provider?.providerName === "OpenAI",
+  );
   allModels = sortModelTable(allModels);
-
   return allModels;
 }
 
