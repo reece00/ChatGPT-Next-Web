@@ -585,6 +585,8 @@
   overflow: auto;
   display: flex;
   flex-direction: column-reverse;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: auto;
 
   background-color: var(--white);
   border: var(--border-in-light);
