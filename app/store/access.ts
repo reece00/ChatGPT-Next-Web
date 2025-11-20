@@ -285,6 +285,11 @@ export const useAccessStore = createPersistStore(
   {
     name: StoreKey.Access,
     version: 2,
+    // 排除易变字段，避免刷新造成频繁写入
+    partialize: (state: any) => {
+      const { lastUpdateTime, ...rest } = state;
+      return rest;
+    },
     migrate(persistedState, version) {
       if (version < 2) {
         const state = persistedState as {

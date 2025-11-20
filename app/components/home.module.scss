@@ -120,7 +120,7 @@
     left: -100%;
     z-index: 1000;
     height: var(--full-height);
-    transition: all ease 0.3s;
+    transition: none;
     box-shadow: none;
   }
 
@@ -202,7 +202,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  animation: slide-in ease 0.3s;
+  /* remove entrance animation */
 }
 
 .chat-item-delete {
@@ -229,7 +229,7 @@
   color: rgb(166, 166, 166);
   font-size: 12px;
   margin-top: 8px;
-  animation: slide-in ease 0.3s;
+  /* remove entrance animation */
 }
 
 .chat-item-count,
@@ -306,6 +306,8 @@
   }
 
   .sidebar-tail {
+    position: sticky;
+    bottom: 0;
     flex-direction: column-reverse;
     align-items: center;
 
@@ -322,9 +324,13 @@
 }
 
 .sidebar-tail {
+  position: sticky;
+  bottom: 0;
+  background-color: var(--second);
+  width: 100%;
   display: flex;
   justify-content: space-between;
-  padding-top: 20px;
+  padding-top: 2px;
 }
 
 .sidebar-actions {

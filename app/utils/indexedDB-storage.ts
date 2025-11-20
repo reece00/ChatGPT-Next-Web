@@ -21,6 +21,31 @@ class IndexedDBStorage implements StateStorage {
         console.warn("skip setItem", name);
         return;
       }
+      // Avoid redundant writes when only hydration markers or timestamps change
+      try {
+        const old = await get(name);
+        if (old) {
+          const oldJson = JSON.parse(old);
+          const newJson = JSON.parse(value);
+          const strip = (obj: any) => {
+            try {
+              const s = JSON.parse(JSON.stringify(obj));
+              delete s.state?.lastUpdateTime;
+              // hydration 标志不参与有效负载比较（避免仅因水合变化而重写）
+              delete s.state?._hasHydrated;
+              return s;
+            } catch {
+              return obj;
+            }
+          };
+          const oldStripped = strip(oldJson);
+          const newStripped = strip(newJson);
+          if (JSON.stringify(oldStripped) === JSON.stringify(newStripped)) {
+            // payload 未变化，跳过写入
+            return;
+          }
+        }
+      } catch {}
       await set(name, value);
     } catch (error) {
       localStorage.setItem(name, value);

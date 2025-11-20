@@ -196,6 +196,12 @@ export const useAppConfig = createPersistStore(
   {
     name: StoreKey.Config,
     version: 4.1,
+    // 仅持久化必要的轻量字段，避免将庞大的 `models` 列表写入 IndexedDB，减少刷新写入增长
+    // 保留 `_hasHydrated` 以通过 IndexedDB 写入校验
+    partialize: (state: any) => {
+      const { models, lastUpdateTime, ...rest } = state;
+      return rest;
+    },
 
     merge(persistedState, currentState) {
       const state = persistedState as ChatConfig | undefined;

@@ -20,8 +20,6 @@ import SpeakIcon from "../icons/speak.svg";
 import SpeakStopIcon from "../icons/speak-stop.svg";
 import LoadingIcon from "../icons/three-dots.svg";
 import LoadingButtonIcon from "../icons/loading.svg";
-import PromptIcon from "../icons/prompt.svg";
-import MaskIcon from "../icons/mask.svg";
 import MaxIcon from "../icons/max.svg";
 import MinIcon from "../icons/min.svg";
 import ResetIcon from "../icons/reload.svg";
@@ -35,9 +33,6 @@ import CloseIcon from "../icons/close.svg";
 import CancelIcon from "../icons/cancel.svg";
 import ImageIcon from "../icons/image.svg";
 
-import LightIcon from "../icons/light.svg";
-import DarkIcon from "../icons/dark.svg";
-import AutoIcon from "../icons/auto.svg";
 import BottomIcon from "../icons/bottom.svg";
 import StopIcon from "../icons/pause.svg";
 import RobotIcon from "../icons/robot.svg";
@@ -77,7 +72,10 @@ import {
   showPlugins,
 } from "../utils";
 
-import { uploadImage as uploadImageRemote } from "@/app/utils/chat";
+import {
+  uploadImage as uploadImageRemote,
+  removeImage as removeImageRemote,
+} from "@/app/utils/chat";
 
 import dynamic from "next/dynamic";
 
@@ -107,6 +105,7 @@ import {
   REQUEST_TIMEOUT_MS,
   ServiceProvider,
   UNFINISHED_INPUT,
+  CACHE_URL_PREFIX,
 } from "../constant";
 import { Avatar } from "./emoji";
 import { ContextPrompts, MaskAvatar, MaskConfig } from "./mask";
@@ -621,6 +620,21 @@ export function ChatActions(props: {
           />
         )}
 
+        <ChatAction
+          onClick={() => {
+            showToast(Locale.Chat.Actions.RefreshToast);
+            chatStore.summarizeSession(true, session);
+          }}
+          text={Locale.Chat.Actions.RefreshTitle}
+          icon={<ReloadIcon />}
+        />
+
+        <ChatAction
+          onClick={() => setShowModelSelector(true)}
+          text={currentModelName}
+          icon={<RobotIcon />}
+        />
+
         {showUploadImage && (
           <ChatAction
             onClick={props.uploadImage}
@@ -628,35 +642,7 @@ export function ChatActions(props: {
             icon={props.uploading ? <LoadingButtonIcon /> : <ImageIcon />}
           />
         )}
-        <ChatAction
-          onClick={nextTheme}
-          text={Locale.Chat.InputActions.Theme[theme]}
-          icon={
-            <>
-              {theme === Theme.Auto ? (
-                <AutoIcon />
-              ) : theme === Theme.Light ? (
-                <LightIcon />
-              ) : theme === Theme.Dark ? (
-                <DarkIcon />
-              ) : null}
-            </>
-          }
-        />
-
-        <ChatAction
-          onClick={props.showPromptHints}
-          text={Locale.Chat.InputActions.Prompt}
-          icon={<PromptIcon />}
-        />
-
-        <ChatAction
-          onClick={() => {
-            navigate(Path.Masks);
-          }}
-          text={Locale.Chat.InputActions.Masks}
-          icon={<MaskIcon />}
-        />
+        {/* removed Theme, Prompt hints, and Masks actions per user preference */}
 
         <ChatAction
           text={Locale.Chat.InputActions.Clear}
@@ -673,11 +659,7 @@ export function ChatActions(props: {
           }}
         />
 
-        <ChatAction
-          onClick={() => setShowModelSelector(true)}
-          text={currentModelName}
-          icon={<RobotIcon />}
-        />
+        {/* model selector moved above after refresh */}
 
         {showModelSelector && (
           <Selector
@@ -1203,18 +1185,40 @@ function _Chat() {
   };
 
   const deleteMessage = (msgId?: string) => {
-    chatStore.updateTargetSession(
-      session,
-      (session) =>
-        (session.messages = session.messages.filter((m) => m.id !== msgId)),
-    );
+    chatStore.updateTargetSession(session, (session) => {
+      const target = session.messages.find((m) => m.id === msgId);
+      if (target) {
+        const urls = getMessageImages(target);
+        urls.forEach((url) => {
+          if (url && url.includes(CACHE_URL_PREFIX)) {
+            try {
+              removeImageRemote(url);
+            } catch {}
+          }
+        });
+      }
+      session.messages = session.messages.filter((m) => m.id !== msgId);
+    });
   };
 
   const onDelete = (msgId: string) => {
     deleteMessage(msgId);
   };
 
-  const onResend = (message: ChatMessage) => {
+  // 删除当前消息关联的上一条用户提问
+  const onDeletePrevUser = (message: ChatMessage) => {
+    const index = session.messages.findIndex((m) => m.id === message.id);
+    if (index < 0) return;
+    for (let i = index; i >= 0; i -= 1) {
+      const m = session.messages[i];
+      if (m.role === "user") {
+        deleteMessage(m.id);
+        break;
+      }
+    }
+  };
+
+  const onResend = (message: ChatMessage, deletePair?: boolean) => {
     // when it is resending a message
     // 1. for a user's message, find the next bot response
     // 2. for a bot's message, find the last user's input
@@ -1261,6 +1265,11 @@ function _Chat() {
     // delete the original messages
     deleteMessage(userMessage.id);
     deleteMessage(botMessage?.id);
+
+    // if only delete pair, do not resend
+    if (deletePair) {
+      return;
+    }
 
     // resend the message
     setIsLoading(true);
@@ -1805,6 +1814,87 @@ function _Chat() {
                         }
                       >
                         <div className={styles["chat-message-container"]}>
+                          {message?.tools?.length == 0 && showTyping && (
+                            <div className={styles["chat-message-status"]}>
+                              {Locale.Chat.Typing}
+                            </div>
+                          )}
+                          {/*@ts-ignore*/}
+                          {message?.tools?.length > 0 && (
+                            <div className={styles["chat-message-tools"]}>
+                              {message?.tools?.map((tool) => (
+                                <div
+                                  key={tool.id}
+                                  title={tool?.errorMsg}
+                                  className={styles["chat-message-tool"]}
+                                >
+                                  {tool.isError === false ? (
+                                    <ConfirmIcon />
+                                  ) : tool.isError === true ? (
+                                    <CloseIcon />
+                                  ) : (
+                                    <LoadingButtonIcon />
+                                  )}
+                                  <span>{tool?.function?.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <div className={styles["chat-message-item"]}>
+                            <Markdown
+                              key={message.streaming ? "loading" : "done"}
+                              content={getMessageTextContent(message)}
+                              loading={
+                                (message.preview || message.streaming) &&
+                                message.content.length === 0 &&
+                                !isUser
+                              }
+                              //   onContextMenu={(e) => onRightClick(e, message)} // hard to use
+                              onDoubleClickCapture={() => {
+                                if (!isMobileScreen) return;
+                                setUserInput(getMessageTextContent(message));
+                              }}
+                              fontSize={fontSize}
+                              fontFamily={fontFamily}
+                              parentRef={scrollRef}
+                              defaultShow={i >= messages.length - 6}
+                            />
+                            {getMessageImages(message).length == 1 && (
+                              <img
+                                className={styles["chat-message-item-image"]}
+                                src={getMessageImages(message)[0]}
+                                alt=""
+                              />
+                            )}
+                            {getMessageImages(message).length > 1 && (
+                              <div
+                                className={styles["chat-message-item-images"]}
+                                style={
+                                  {
+                                    "--image-count":
+                                      getMessageImages(message).length,
+                                  } as React.CSSProperties
+                                }
+                              >
+                                {getMessageImages(message).map(
+                                  (image, index) => {
+                                    return (
+                                      <img
+                                        className={
+                                          styles[
+                                            "chat-message-item-image-multi"
+                                          ]
+                                        }
+                                        key={index}
+                                        src={image}
+                                        alt=""
+                                      />
+                                    );
+                                  },
+                                )}
+                              </div>
+                            )}
+                          </div>
                           <div className={styles["chat-message-header"]}>
                             <div className={styles["chat-message-avatar"]}>
                               <div className={styles["chat-message-edit"]}>
@@ -1891,12 +1981,21 @@ function _Chat() {
                                         onClick={() => onResend(message)}
                                       />
 
+                                      {/* 删除上一条用户提问，仅在 AI 消息时展示 */}
+                                      <ChatAction
+                                        text={
+                                          Locale.Chat.Actions.DeleteQuestion
+                                        }
+                                        icon={<DeleteIcon />}
+                                        onClick={() =>
+                                          onDeletePrevUser(message)
+                                        }
+                                      />
+
                                       <ChatAction
                                         text={Locale.Chat.Actions.Delete}
                                         icon={<DeleteIcon />}
-                                        onClick={() =>
-                                          onDelete(message.id ?? i)
-                                        }
+                                        onClick={() => onResend(message, true)}
                                       />
 
                                       <ChatAction
@@ -1940,87 +2039,6 @@ function _Chat() {
                               </div>
                             )}
                           </div>
-                          {message?.tools?.length == 0 && showTyping && (
-                            <div className={styles["chat-message-status"]}>
-                              {Locale.Chat.Typing}
-                            </div>
-                          )}
-                          {/*@ts-ignore*/}
-                          {message?.tools?.length > 0 && (
-                            <div className={styles["chat-message-tools"]}>
-                              {message?.tools?.map((tool) => (
-                                <div
-                                  key={tool.id}
-                                  title={tool?.errorMsg}
-                                  className={styles["chat-message-tool"]}
-                                >
-                                  {tool.isError === false ? (
-                                    <ConfirmIcon />
-                                  ) : tool.isError === true ? (
-                                    <CloseIcon />
-                                  ) : (
-                                    <LoadingButtonIcon />
-                                  )}
-                                  <span>{tool?.function?.name}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          <div className={styles["chat-message-item"]}>
-                            <Markdown
-                              key={message.streaming ? "loading" : "done"}
-                              content={getMessageTextContent(message)}
-                              loading={
-                                (message.preview || message.streaming) &&
-                                message.content.length === 0 &&
-                                !isUser
-                              }
-                              //   onContextMenu={(e) => onRightClick(e, message)} // hard to use
-                              onDoubleClickCapture={() => {
-                                if (!isMobileScreen) return;
-                                setUserInput(getMessageTextContent(message));
-                              }}
-                              fontSize={fontSize}
-                              fontFamily={fontFamily}
-                              parentRef={scrollRef}
-                              defaultShow={i >= messages.length - 6}
-                            />
-                            {getMessageImages(message).length == 1 && (
-                              <img
-                                className={styles["chat-message-item-image"]}
-                                src={getMessageImages(message)[0]}
-                                alt=""
-                              />
-                            )}
-                            {getMessageImages(message).length > 1 && (
-                              <div
-                                className={styles["chat-message-item-images"]}
-                                style={
-                                  {
-                                    "--image-count":
-                                      getMessageImages(message).length,
-                                  } as React.CSSProperties
-                                }
-                              >
-                                {getMessageImages(message).map(
-                                  (image, index) => {
-                                    return (
-                                      <img
-                                        className={
-                                          styles[
-                                            "chat-message-item-image-multi"
-                                          ]
-                                        }
-                                        key={index}
-                                        src={image}
-                                        alt=""
-                                      />
-                                    );
-                                  },
-                                )}
-                              </div>
-                            )}
-                          </div>
                           {message?.audio_url && (
                             <div className={styles["chat-message-audio"]}>
                               <audio src={message.audio_url} controls />
@@ -2030,7 +2048,11 @@ function _Chat() {
                           <div className={styles["chat-message-action-date"]}>
                             {isContext
                               ? Locale.Chat.IsContext
-                              : message.date.toLocaleString()}
+                              : `${message.date.toLocaleString()} · ${
+                                  !isUser && message.model
+                                    ? message.model + " · "
+                                    : ""
+                                }${getMessageTextContent(message).length}`}
                           </div>
                         </div>
                       </div>
@@ -2105,6 +2127,12 @@ function _Chat() {
                           <div className={styles["attach-image-mask"]}>
                             <DeleteImageButton
                               deleteImage={() => {
+                                const url = attachImages[index];
+                                if (url && url.includes(CACHE_URL_PREFIX)) {
+                                  try {
+                                    removeImageRemote(url);
+                                  } catch {}
+                                }
                                 setAttachImages(
                                   attachImages.filter((_, i) => i !== index),
                                 );
@@ -2123,6 +2151,23 @@ function _Chat() {
                   type="primary"
                   onClick={() => doSubmit(userInput)}
                 />
+                {useMobileScreen() && (
+                  <button
+                    onClick={() => {
+                      setUserInput("");
+                      setAttachImages([]);
+                    }}
+                    style={{
+                      height: "40px",
+                      width: "90px",
+                      marginRight: "20px",
+                      marginTop: "10px",
+                      marginLeft: "5px",
+                    }}
+                  >
+                    清空
+                  </button>
+                )}
               </label>
             </div>
           </div>

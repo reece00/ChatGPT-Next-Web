@@ -130,7 +130,10 @@ export function getLocalAppState() {
 
 export function setLocalAppState(appState: AppState) {
   Object.entries(LocalStateSetters).forEach(([key, setter]) => {
-    setter(appState[key as keyof AppState]);
+    const state = appState[key as keyof AppState] as any;
+    // 确保导入后的状态具备水合标志，从而允许持久化写入
+    const nextState = { ...state, _hasHydrated: true };
+    setter(nextState);
   });
 }
 
@@ -153,7 +156,7 @@ export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
   remoteState: T,
 ) {
   const localUpdateTime = localState.lastUpdateTime ?? 0;
-  const remoteUpdateTime = localState.lastUpdateTime ?? 1;
+  const remoteUpdateTime = remoteState.lastUpdateTime ?? 1;
 
   if (localUpdateTime < remoteUpdateTime) {
     merge(remoteState, localState);

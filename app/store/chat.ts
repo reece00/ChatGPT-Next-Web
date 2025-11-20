@@ -35,6 +35,8 @@ import { estimateTokenLength } from "../utils/token";
 import { ModelConfig, ModelType, useAppConfig } from "./config";
 import { useAccessStore } from "./access";
 import { collectModelsWithDefaultModel } from "../utils/model";
+import { removeImage as removeImageRemote } from "@/app/utils/chat";
+import { CACHE_URL_PREFIX } from "../constant";
 import { createEmptyMask, Mask } from "./mask";
 import { executeMcpAction, getAllTools, isMcpEnabled } from "../mcp/actions";
 import { extractMcpJson, isMcpJson } from "../mcp/utils";
@@ -318,7 +320,7 @@ export const useChatStore = createPersistStore(
               ...mask.modelConfig,
             },
           };
-          session.topic = mask.name;
+          // session.topic = mask.name;
         }
 
         set((state) => ({
@@ -339,6 +341,20 @@ export const useChatStore = createPersistStore(
         const deletedSession = get().sessions.at(index);
 
         if (!deletedSession) return;
+
+        // 清理被删除会话中引用的缓存图片
+        try {
+          deletedSession.messages.forEach((msg) => {
+            const urls = getMessageImages(msg);
+            urls.forEach((url) => {
+              if (url && url.includes(CACHE_URL_PREFIX)) {
+                try {
+                  removeImageRemote(url);
+                } catch {}
+              }
+            });
+          });
+        } catch {}
 
         const sessions = get().sessions.slice();
         sessions.splice(index, 1);
@@ -688,7 +704,10 @@ export const useChatStore = createPersistStore(
           (config.enableAutoGenerateTitle &&
             session.topic === DEFAULT_TOPIC &&
             countMessages(messages) >= SUMMARIZE_MIN_LEN) ||
-          refreshTitle
+          refreshTitle ||
+          messages.length % 12 === 0 ||
+          (typeof window !== "undefined" &&
+            (window as any).EvaluationTitleMode === true)
         ) {
           const startIndex = Math.max(
             0,
@@ -723,6 +742,12 @@ export const useChatStore = createPersistStore(
               }
             },
           });
+        }
+        if (
+          typeof window !== "undefined" &&
+          (window as any).EvaluationTitleMode === true
+        ) {
+          (window as any).EvaluationTitleMode = false;
         }
         const summarizeIndex = Math.max(
           session.lastSummarizeIndex,
@@ -861,6 +886,11 @@ export const useChatStore = createPersistStore(
   {
     name: StoreKey.Chat,
     version: 3.3,
+    // 排除易变且无必要持久化的字段，减少刷新重写
+    partialize: (state: any) => {
+      const { lastUpdateTime, ...rest } = state;
+      return rest;
+    },
     migrate(persistedState, version) {
       const state = persistedState as any;
       const newState = JSON.parse(

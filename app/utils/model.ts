@@ -75,7 +75,7 @@ export function collectModelTable(
 
   // server custom models
   customModels
-    .split(",")
+    .split(/[\n\r,]+/)
     .filter((v) => !!v && v.length > 0)
     .forEach((m) => {
       const available = !m.startsWith("-");

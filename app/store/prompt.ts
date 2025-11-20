@@ -133,6 +133,11 @@ export const usePromptStore = createPersistStore(
   {
     name: StoreKey.Prompt,
     version: 3,
+    // 排除易变字段，避免刷新造成频繁写入
+    partialize: (state: any) => {
+      const { lastUpdateTime, ...rest } = state;
+      return rest;
+    },
 
     migrate(state, version) {
       const newState = JSON.parse(JSON.stringify(state)) as {

@@ -194,7 +194,8 @@ export function stream(
   let runTools: any[] = [];
   let responseRes: Response;
 
-  // animate response to make it looks smooth
+  // animate response to make it looks smooth, throttled to ~80ms
+  let lastUpdateTime = 0;
   function animateResponseText() {
     if (finished || controller.signal.aborted) {
       responseText += remainText;
@@ -205,11 +206,13 @@ export function stream(
       return;
     }
 
-    if (remainText.length > 0) {
+    const now = Date.now();
+    if (remainText.length > 0 && now - lastUpdateTime >= 80) {
       const fetchCount = Math.max(1, Math.round(remainText.length / 60));
       const fetchText = remainText.slice(0, fetchCount);
       responseText += fetchText;
       remainText = remainText.slice(fetchCount);
+      lastUpdateTime = now;
       options.onUpdate?.(responseText, fetchText);
     }
 
@@ -420,7 +423,8 @@ export function streamWithThink(
   let lastIsThinking = false;
   let lastIsThinkingTagged = false; //between <think> and </think> tags
 
-  // animate response to make it looks smooth
+  // animate response to make it looks smooth, throttled to ~80ms
+  let lastUpdateTime = 0;
   function animateResponseText() {
     if (finished || controller.signal.aborted) {
       responseText += remainText;
@@ -431,11 +435,13 @@ export function streamWithThink(
       return;
     }
 
-    if (remainText.length > 0) {
+    const now = Date.now();
+    if (remainText.length > 0 && now - lastUpdateTime >= 80) {
       const fetchCount = Math.max(1, Math.round(remainText.length / 60));
       const fetchText = remainText.slice(0, fetchCount);
       responseText += fetchText;
       remainText = remainText.slice(fetchCount);
+      lastUpdateTime = now;
       options.onUpdate?.(responseText, fetchText);
     }
 
