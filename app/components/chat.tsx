@@ -501,6 +501,7 @@ export function ChatActions(props: {
   setShowShortcutKeyModal: React.Dispatch<React.SetStateAction<boolean>>;
   setUserInput: (input: string) => void;
   setShowChatSidePanel: React.Dispatch<React.SetStateAction<boolean>>;
+  onEditTitle: () => void;
 }) {
   const config = useAppConfig();
   const navigate = useNavigate();
@@ -618,6 +619,13 @@ export function ChatActions(props: {
             icon={<SettingsIcon />}
           />
         )}
+
+        {/* 编辑标题：复制自窗口头部按钮，放在输入工具栏，靠前位置 */}
+        <ChatAction
+          onClick={props.onEditTitle}
+          text={Locale.Chat.EditMessage.Title}
+          icon={<RenameIcon />}
+        />
 
         <ChatAction
           onClick={() => {
@@ -2071,6 +2079,7 @@ function _Chat() {
                 setShowShortcutKeyModal={setShowShortcutKeyModal}
                 setUserInput={setUserInput}
                 setShowChatSidePanel={setShowChatSidePanel}
+                onEditTitle={() => setIsEditingMessage(true)}
               />
               <label
                 className={clsx(styles["chat-input-panel-inner"], {
