@@ -53,6 +53,7 @@ const en: LocaleType = {
       PinToastContent: "Pinned 1 messages to contextual prompts",
       PinToastAction: "View",
       Delete: "Delete",
+      DeleteQuestion: "Delete Question",
       Edit: "Edit",
       FullScreen: "FullScreen",
       RefreshTitle: "Refresh Title",

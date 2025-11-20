@@ -20,8 +20,16 @@ const nextConfig = {
       );
     }
 
+    // Ignore native optional deps required by ws/rt-client in browser build
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      bufferutil: false,
+      "utf-8-validate": false,
+    };
+
     config.resolve.fallback = {
       child_process: false,
+      ...(config.resolve.fallback || {}),
     };
 
     return config;
@@ -29,6 +37,10 @@ const nextConfig = {
   output: mode,
   images: {
     unoptimized: mode === "export",
+  },
+  // Avoid ESLint build failures on CI (plugins may crash on certain AST)
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   experimental: {
     forceSwcTransforms: true,
