@@ -70,7 +70,8 @@
 @media only screen and (max-width: 600px) {
   :root {
     --window-width: 100vw;
-    --window-height: var(--full-height);
+    // use dynamic viewport on mobile to align with iOS keyboard
+    --window-height: 100svh;
     --sidebar-width: 100vw;
     --window-content-width: var(--window-width);
     --message-max-width: 100%;
@@ -78,6 +79,15 @@
 
   .no-mobile {
     display: none;
+  }
+}
+
+// prefer dynamic viewport height when supported (iOS Safari newer versions)
+@supports (height: 100dvh) {
+  @media only screen and (max-width: 600px) {
+    :root {
+      --window-height: 100dvh;
+    }
   }
 }
 

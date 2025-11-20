@@ -559,6 +559,7 @@
   width: 100%;
   padding: 20px;
   padding-top: 10px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
   box-sizing: border-box;
   flex-direction: column;
   border-top: var(--border-in-light);
@@ -634,7 +635,7 @@
 }
 
 .chat-input-panel-inner-attach {
-  padding-bottom: 80px;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
 }
 
 .chat-input-panel-inner:has(.chat-input:focus) {
@@ -666,7 +667,7 @@
 
   position: absolute;
   right: 30px;
-  bottom: 32px;
+  bottom: calc(32px + env(safe-area-inset-bottom));
 }
 
 // 清空输入按钮，靠近发送按钮左侧
@@ -677,7 +678,7 @@
   }
 
   .chat-input-send {
-    bottom: 30px;
+    bottom: calc(30px + env(safe-area-inset-bottom));
   }
 }
 

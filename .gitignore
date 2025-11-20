@@ -1,4 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+/.trae/documents
+/repro_docs
 
 # dependencies
 /node_modules
@@ -49,9 +51,3 @@ masks.json
 
 # mcp config
 app/mcp/mcp_config.json
-
-/repro_docs
-.trae/documents/导出复现资料文件夹（TXT）用于上游更新后复现.md
-.trae/documents/减少刷新引起的 IndexedDB 增长并确保设置项持久化.md
-.trae/documents/将 reece00 的意图型修改迁移到最新 main2 分支（UI 与会话管理）.md
-.trae/documents/Tampermonkey 导出旧版数据为新版本可导入的 JSON.md
