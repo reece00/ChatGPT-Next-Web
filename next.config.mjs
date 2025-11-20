@@ -38,10 +38,6 @@ const nextConfig = {
   images: {
     unoptimized: mode === "export",
   },
-  // Avoid ESLint build failures on CI (plugins may crash on certain AST)
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   experimental: {
     forceSwcTransforms: true,
   },
