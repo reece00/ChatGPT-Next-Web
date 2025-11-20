@@ -239,16 +239,8 @@ export function SideBar(props: { className?: string }) {
       shouldNarrow={shouldNarrow}
       {...props}
     >
-      {/* Sidebar header removed per user preference: remove top title and two buttons */}
-      <SideBarBody
-        onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            navigate(Path.Home);
-          }
-        }}
-      >
-        <ChatList narrow={shouldNarrow} />
-      </SideBarBody>
+      {/* 直接渲染列表到侧栏以匹配 main 结构 */}
+      <ChatList narrow={shouldNarrow} />
       <SideBarTail
         primaryAction={
           <>

@@ -824,6 +824,11 @@ export function ChatActions(props: {
             icon={<HeadphoneIcon />}
           />
         )}
+        <ChatAction
+          onClick={() => navigate(Path.Home)}
+          text={Locale.Chat.Actions.ChatList}
+          icon={<ReturnIcon />}
+        />
       </div>
     </div>
   );

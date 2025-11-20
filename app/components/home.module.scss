@@ -10,7 +10,7 @@
   max-width: 1200px;
 
   display: flex;
-  overflow: hidden;
+  
   box-sizing: border-box;
 
   width: var(--window-width);
@@ -42,6 +42,11 @@
   width: var(--sidebar-width);
   box-sizing: border-box;
   padding: 20px;
+  overflow: visible;
+  @media (min-width: 600px) {
+    overflow: auto;
+  }
+  height: auto;
   background-color: var(--second);
   display: flex;
   flex-direction: column;
@@ -168,7 +173,7 @@
 
 .sidebar-body {
   flex: 1;
-  overflow: auto;
+  overflow: visible;
   overflow-x: hidden;
 }
 
@@ -352,4 +357,8 @@
 
 .rtl-screen {
   direction: rtl;
+}
+
+.chat-list {
+  flex: 1;
 }
