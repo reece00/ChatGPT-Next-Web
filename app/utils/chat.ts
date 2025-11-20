@@ -194,7 +194,7 @@ export function stream(
   let runTools: any[] = [];
   let responseRes: Response;
 
-  // animate response to make it looks smooth, throttled to ~80ms
+  // animate response to make it looks smooth, throttled to ~50ms
   let lastUpdateTime = 0;
   function animateResponseText() {
     if (finished || controller.signal.aborted) {
@@ -207,13 +207,12 @@ export function stream(
     }
 
     const now = Date.now();
-    if (remainText.length > 0 && now - lastUpdateTime >= 80) {
-      const fetchCount = Math.max(1, Math.round(remainText.length / 60));
-      const fetchText = remainText.slice(0, fetchCount);
-      responseText += fetchText;
-      remainText = remainText.slice(fetchCount);
+    if (remainText.length > 0 && now - lastUpdateTime >= 50) {
+      const flushedText = remainText;
+      responseText += flushedText;
+      remainText = "";
       lastUpdateTime = now;
-      options.onUpdate?.(responseText, fetchText);
+      options.onUpdate?.(responseText, flushedText);
     }
 
     requestAnimationFrame(animateResponseText);
@@ -423,7 +422,7 @@ export function streamWithThink(
   let lastIsThinking = false;
   let lastIsThinkingTagged = false; //between <think> and </think> tags
 
-  // animate response to make it looks smooth, throttled to ~80ms
+  // animate response to make it looks smooth, throttled to ~50ms
   let lastUpdateTime = 0;
   function animateResponseText() {
     if (finished || controller.signal.aborted) {
@@ -436,13 +435,12 @@ export function streamWithThink(
     }
 
     const now = Date.now();
-    if (remainText.length > 0 && now - lastUpdateTime >= 80) {
-      const fetchCount = Math.max(1, Math.round(remainText.length / 60));
-      const fetchText = remainText.slice(0, fetchCount);
-      responseText += fetchText;
-      remainText = remainText.slice(fetchCount);
+    if (remainText.length > 0 && now - lastUpdateTime >= 50) {
+      const flushedText = remainText;
+      responseText += flushedText;
+      remainText = "";
       lastUpdateTime = now;
-      options.onUpdate?.(responseText, fetchText);
+      options.onUpdate?.(responseText, flushedText);
     }
 
     requestAnimationFrame(animateResponseText);
