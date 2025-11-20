@@ -77,6 +77,23 @@ export function createMessage(override: Partial<ChatMessage>): ChatMessage {
   };
 }
 
+// Extract image urls from a message's content
+function getMessageImages(message: ChatMessage): string[] {
+  const urls: string[] = [];
+  const content: any = message.content as any;
+  if (!content) return urls;
+  if (typeof content === "string") return urls;
+  try {
+    for (const part of content as any[]) {
+      if (part?.type === "image_url") {
+        const url = part?.image_url?.url ?? part?.image_url;
+        if (url) urls.push(url);
+      }
+    }
+  } catch {}
+  return urls;
+}
+
 export interface ChatStat {
   tokenCount: number;
   wordCount: number;
