@@ -83,10 +83,6 @@ export const DEFAULT_MODELS = [
     available: false,
   },
   {
-    name: "gpt-4o",
-    available: true,
-  },
-  {
     name: "gpt-4",
     available: true,
   },
