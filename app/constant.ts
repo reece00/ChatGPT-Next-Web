@@ -63,7 +63,7 @@ The default user language is Simplified Chinese`;
 
 export const DEFAULT_MODELS = [
   {
-    name: "gpt-4",
+    name: "gpt-5",
     available: false,
   },
   {
@@ -71,31 +71,19 @@ export const DEFAULT_MODELS = [
     available: false,
   },
   {
-    name: "gpt-4-1106-preview",
+    name: "Gemini-2.5-pro",
     available: true,
   },
   {
-    name: "gpt-4-0613",
+    name: "Grok-4",
     available: true,
   },
   {
-    name: "gpt-4o-mini",
+    name: "DeepSeek-V3.2",
     available: false,
   },
   {
     name: "gpt-4o",
-    available: true,
-  },
-    {
-    name: "o1-mini",
-    available: true,
-  },
-  {
-    name: "o1-preview",
-    available: true,
-  },
-  {
-    name: "gpt-4-0125-preview",
     available: true,
   },
 ] as const;
