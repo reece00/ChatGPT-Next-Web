@@ -534,7 +534,7 @@ export const useChatStore = create<ChatStore>()(
             messages: topicMessages,
             config: {
               temperature: 0.3,
-              model: "GPT-4.1-nano",
+              model: "gpt-4.1-nano",
             },
             onFinish(message) {
               get().updateCurrentSession(
