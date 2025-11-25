@@ -79,7 +79,7 @@ export const DEFAULT_MODELS = [
     available: true,
   },
   {
-    name: "DeepSeek-V3.2",
+    name: "Pro/deepseek-ai/DeepSeek-V3.2-Exp",
     available: false,
   },
   {
