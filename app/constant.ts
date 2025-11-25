@@ -71,15 +71,15 @@ export const DEFAULT_MODELS = [
     available: false,
   },
   {
-    name: "Gemini-2.5-pro",
+    name: "gemini-2.5-pro",
     available: true,
   },
   {
-    name: "Grok-4",
+    name: "grok-4",
     available: true,
   },
   {
-    name: "DeepSeek-V3.2",
+    name: "deepseek-V3.2",
     available: false,
   },
   {
