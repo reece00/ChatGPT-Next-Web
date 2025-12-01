@@ -79,6 +79,10 @@ export const DEFAULT_MODELS = [
     available: true,
   },
   {
+    name: "gemini-3-pro-preview",
+    available: true,
+  },
+  {
     name: "grok-4",
     available: true,
   },
