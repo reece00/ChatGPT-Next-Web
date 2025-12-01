@@ -67,6 +67,10 @@ export const DEFAULT_MODELS = [
     available: false,
   },
   {
+    name: "gpt-5-chat-latest",
+    available: false,
+  },
+  {
     name: "gpt-3.5-turbo",
     available: false,
   },
