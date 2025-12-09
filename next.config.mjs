@@ -30,9 +30,7 @@ const nextConfig = {
   images: {
     unoptimized: mode === "export",
   },
-  experimental: {
-    forceSwcTransforms: true,
-  },
+  // experimental options removed to avoid SWC config parsing issues
 };
 
 if (mode !== "export") {

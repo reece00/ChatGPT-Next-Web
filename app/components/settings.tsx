@@ -346,8 +346,8 @@ export function Settings() {
               checkingUpdate
                 ? Locale.Settings.Update.IsChecking
                 : hasNewVersion
-                ? Locale.Settings.Update.FoundUpdate(remoteId ?? "ERROR")
-                : Locale.Settings.Update.IsLatest
+                  ? Locale.Settings.Update.FoundUpdate(remoteId ?? "ERROR")
+                  : Locale.Settings.Update.IsLatest
             }
           >
             {checkingUpdate ? (
@@ -578,6 +578,30 @@ export function Settings() {
                   placeholder={Locale.Settings.Token.Placeholder}
                   onChange={(e) => {
                     accessStore.updateToken(e.currentTarget.value);
+                  }}
+                />
+              </ListItem>
+
+              <ListItem title="自动填充设置">
+                <IconButton
+                  text="从服务器获取设置"
+                  onClick={async () => {
+                    if (!accessStore.isAuthorized()) {
+                      alert("请先输入正确的密码或API Key");
+                      return;
+                    }
+                    try {
+                      const res = await fetch("/api/fill-settings", {
+                        method: "POST",
+                      });
+                      const data = await res.json();
+                      if (data.openaiUrl)
+                        accessStore.updateOpenAiUrl(data.openaiUrl);
+                      if (data.apiKey) accessStore.updateToken(data.apiKey);
+                      alert("已自动填充服务器设置");
+                    } catch (e) {
+                      alert("获取失败，请检查网络或服务器配置");
+                    }
                   }}
                 />
               </ListItem>

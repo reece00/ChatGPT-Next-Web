@@ -46,13 +46,6 @@ export function ChatItem(props: {
   const location = useLocation();
 
   useEffect(() => {
-    handleRouteChange();
-  }, [location]);
-  useEffect(() => {
-    handleRouteChange();
-  }, []);
-
-  function handleRouteChange() {
     console.debug("路由变化了", location.pathname);
     if (location.pathname === "/") {
       const scrollPosition = sessionStorage.getItem("scrollPosition");
@@ -61,7 +54,7 @@ export function ChatItem(props: {
         window.scrollTo(0, parseInt(scrollPosition, 10));
       }
     }
-  }
+  }, [location]);
 
   return (
     <Draggable draggableId={`${props.id}`} index={props.index}>
