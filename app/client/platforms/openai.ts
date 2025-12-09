@@ -173,17 +173,22 @@ export class ChatGPTApi implements LLMApi {
             const text = msg.data;
             try {
               const json = JSON.parse(text);
-              const delta = json.choices[0].delta.content;
-              if (delta) {
-                // buffer delta and emit throttled updates
-                remainText += delta;
-                const now = Date.now();
-                if (remainText.length > 0 && now - lastUpdateTime >= 50) {
-                  const flushedText = remainText;
-                  responseText += flushedText;
-                  remainText = "";
-                  lastUpdateTime = now;
-                  options.onUpdate?.(responseText, flushedText);
+              if (json.choices && json.choices.length > 0) {
+                const choice = json.choices[0];
+                if (choice.delta && choice.delta.content) {
+                  const delta = choice.delta.content;
+                  if (delta) {
+                    // buffer delta and emit throttled updates
+                    remainText += delta;
+                    const now = Date.now();
+                    if (remainText.length > 0 && now - lastUpdateTime >= 50) {
+                      const flushedText = remainText;
+                      responseText += flushedText;
+                      remainText = "";
+                      lastUpdateTime = now;
+                      options.onUpdate?.(responseText, flushedText);
+                    }
+                  }
                 }
               }
             } catch (e) {
