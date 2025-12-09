@@ -582,9 +582,9 @@ export function Settings() {
                 />
               </ListItem>
 
-              <ListItem title="自动填充设置">
+              <ListItem title="获取服务器api密匙到本地">
                 <IconButton
-                  text="从服务器获取设置"
+                  text="填充key和api地址"
                   onClick={async () => {
                     if (!accessStore.isAuthorized()) {
                       alert("请先输入正确的密码或API Key");
@@ -605,8 +605,23 @@ export function Settings() {
                   }}
                 />
               </ListItem>
+
+              <ListItem
+                title={Locale.Settings.ServerRelay.Title}
+                subTitle={Locale.Settings.ServerRelay.SubTitle}
+              >
+                <input
+                  type="checkbox"
+                  checked={accessStore.useServerRelay}
+                  onChange={(e) => {
+                    accessStore.updateServerRelay(e.currentTarget.checked);
+                  }}
+                ></input>
+              </ListItem>
             </>
-          ) : null}
+          ) : (
+            <></>
+          )}
 
           {!accessStore.hideBalanceQuery ? (
             <ListItem

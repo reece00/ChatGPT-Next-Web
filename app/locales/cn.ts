@@ -216,8 +216,12 @@ const cn = {
     },
     Token: {
       Title: "API Key",
-      SubTitle: "使用自己的 Key 可绕过密码访问限制",
+      SubTitle: "使用自己的 Key 绕过密码验证",
       Placeholder: "OpenAI API Key",
+    },
+    ServerRelay: {
+      Title: "优先服务器转发",
+      SubTitle: "忽略本地 API 设置，永远使用服务器访问",
     },
 
     Usage: {

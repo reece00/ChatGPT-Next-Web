@@ -222,6 +222,10 @@ const en: LocaleType = {
       SubTitle: "Use your key to ignore access code limit",
       Placeholder: "OpenAI API Key",
     },
+    ServerRelay: {
+      Title: "Prefer Server Relay",
+      SubTitle: "Ignore local API settings and always use server access",
+    },
     Usage: {
       Title: "Account Balance",
       SubTitle(used: any, total: any) {

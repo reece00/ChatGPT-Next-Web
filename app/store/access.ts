@@ -15,10 +15,12 @@ export interface AccessControlStore {
   disableGPT4: boolean;
 
   openaiUrl: string;
+  useServerRelay: boolean;
 
   updateToken: (_: string) => void;
   updateCode: (_: string) => void;
   updateOpenAiUrl: (_: string) => void;
+  updateServerRelay: (_: boolean) => void;
   enabledAccessControl: () => boolean;
   isAuthorized: () => boolean;
   fetch: () => void;
@@ -39,6 +41,7 @@ export const useAccessStore = create<AccessControlStore>()(
       hideUserApiKey: false,
       hideBalanceQuery: false,
       disableGPT4: false,
+      useServerRelay: false,
 
       openaiUrl: DEFAULT_OPENAI_URL,
 
@@ -55,6 +58,9 @@ export const useAccessStore = create<AccessControlStore>()(
       },
       updateOpenAiUrl(url: string) {
         set(() => ({ openaiUrl: url?.trim() }));
+      },
+      updateServerRelay(useServerRelay: boolean) {
+        set(() => ({ useServerRelay }));
       },
       isAuthorized() {
         get().fetch();
