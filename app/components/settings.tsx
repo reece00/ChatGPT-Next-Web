@@ -46,6 +46,7 @@ import { ErrorBoundary } from "./error";
 import { InputRange } from "./input-range";
 import { useNavigate } from "react-router-dom";
 import { getClientConfig } from "../config/client";
+import { getHeaders } from "../client/api";
 import { useSyncStore } from "../store/sync";
 import { nanoid } from "nanoid";
 
@@ -593,12 +594,25 @@ export function Settings() {
                     try {
                       const res = await fetch("/api/fill-settings", {
                         method: "POST",
+                        headers: {
+                          ...getHeaders(),
+                        },
                       });
                       const data = await res.json();
-                      if (data.openaiUrl)
+                      let filled = false;
+                      if (data.openaiUrl) {
                         accessStore.updateOpenAiUrl(data.openaiUrl);
-                      if (data.apiKey) accessStore.updateToken(data.apiKey);
-                      alert("已自动填充服务器设置");
+                        filled = true;
+                      }
+                      if (data.apiKey) {
+                        accessStore.updateToken(data.apiKey);
+                        filled = true;
+                      }
+                      alert(
+                        filled
+                          ? "已自动填充服务器设置"
+                          : "未获取到服务器设置，请检查环境变量或权限",
+                      );
                     } catch (e) {
                       alert("获取失败，请检查网络或服务器配置");
                     }
