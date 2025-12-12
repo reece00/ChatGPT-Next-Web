@@ -135,7 +135,9 @@ export function getHeaders() {
   const makeBearer = (token: string) => `Bearer ${token.trim()}`;
   const validString = (x: string) => x && x.length > 0;
 
-  if (
+  if (validString(accessStore.token)) {
+    headers.Authorization = makeBearer(accessStore.token);
+  } else if (
     accessStore.enabledAccessControl() &&
     validString(accessStore.accessCode)
   ) {

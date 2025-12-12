@@ -41,6 +41,7 @@ import Locale, {
 import { copyToClipboard } from "../utils";
 import Link from "next/link";
 import { Path, RELEASE_URL, UPDATE_URL } from "../constant";
+import { ACCESS_CODE_PREFIX } from "../constant";
 import { Prompt, SearchService, usePromptStore } from "../store/prompt";
 import { ErrorBoundary } from "./error";
 import { InputRange } from "./input-range";
@@ -592,10 +593,13 @@ export function Settings() {
                         method: "POST",
                         headers: {
                           ...getHeaders(),
+                          Authorization: `Bearer ${ACCESS_CODE_PREFIX}${accessStore.accessCode}`,
                         },
                       });
                       if (!res.ok) {
-                        alert("获取失败，请检查网络或服务器配置");
+                        alert(
+                          `获取失败：${res.status} ${res.statusText}，请检查网络或服务器配置`,
+                        );
                         return;
                       }
 
@@ -608,7 +612,9 @@ export function Settings() {
                       }
                       alert("已自动填充服务器设置");
                     } catch (e) {
-                      alert("获取失败，请检查网络或服务器配置");
+                      alert(
+                        `获取失败：${(e as Error).message}，请检查网络或服务器配置`,
+                      );
                     }
                   }}
                 />
