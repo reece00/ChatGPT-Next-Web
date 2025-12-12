@@ -614,7 +614,10 @@ export function Settings() {
                           : "未获取到服务器设置，请检查环境变量或权限",
                       );
                     } catch (e) {
-                      alert("获取失败，请检查网络或服务器配置");
+                      alert(
+                        (e as Error).message +
+                          "获取失败，请检查网络或服务器配置",
+                      );
                     }
                   }}
                 />
