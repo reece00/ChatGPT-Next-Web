@@ -26,11 +26,13 @@ function checkAuthorization(req: NextRequest): boolean {
 async function handle(req: NextRequest) {
   const isAuthorized = checkAuthorization(req);
 
-  const resp: FillSettingsResponse = {};
-  if (isAuthorized) {
-    if (serverConfig.baseUrl) resp.openaiUrl = serverConfig.baseUrl;
-    if (serverConfig.apiKey) resp.apiKey = serverConfig.apiKey as string;
+  if (!isAuthorized) {
+    return new NextResponse(null, { status: 401 });
   }
+
+  const resp: FillSettingsResponse = {};
+  if (serverConfig.baseUrl) resp.openaiUrl = serverConfig.baseUrl;
+  if (serverConfig.apiKey) resp.apiKey = serverConfig.apiKey as string;
 
   return NextResponse.json(resp);
 }

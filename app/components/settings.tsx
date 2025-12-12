@@ -587,10 +587,6 @@ export function Settings() {
                 <IconButton
                   text="填充key和api地址"
                   onClick={async () => {
-                    if (!accessStore.isAuthorized()) {
-                      alert("请先输入正确的密码");
-                      return;
-                    }
                     try {
                       const res = await fetch("/api/fill-settings", {
                         method: "POST",
@@ -598,26 +594,21 @@ export function Settings() {
                           ...getHeaders(),
                         },
                       });
+                      if (!res.ok) {
+                        alert("获取失败，请检查网络或服务器配置");
+                        return;
+                      }
+
                       const data = await res.json();
-                      let filled = false;
                       if (data.openaiUrl) {
                         accessStore.updateOpenAiUrl(data.openaiUrl);
-                        filled = true;
                       }
                       if (data.apiKey) {
                         accessStore.updateToken(data.apiKey);
-                        filled = true;
                       }
-                      alert(
-                        filled
-                          ? "已自动填充服务器设置"
-                          : "未获取到服务器设置，请检查环境变量或权限",
-                      );
+                      alert("已自动填充服务器设置");
                     } catch (e) {
-                      alert(
-                        (e as Error).message +
-                          "获取失败，请检查网络或服务器配置",
-                      );
+                      alert("获取失败，请检查网络或服务器配置");
                     }
                   }}
                 />
