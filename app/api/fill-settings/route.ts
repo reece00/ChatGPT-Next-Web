@@ -20,11 +20,7 @@ function checkAuthorization(req: NextRequest): boolean {
 
   const hashedCode = md5.hash(accessCode ?? "").trim();
 
-  return (
-    !serverConfig.needCode ||
-    serverConfig.codes.has(hashedCode) ||
-    !!apiKeyFromHeader
-  );
+  return !serverConfig.needCode || serverConfig.codes.has(hashedCode);
 }
 
 async function handle(req: NextRequest) {

@@ -588,7 +588,7 @@ export function Settings() {
                   text="填充key和api地址"
                   onClick={async () => {
                     if (!accessStore.isAuthorized()) {
-                      alert("请先输入正确的密码或API Key");
+                      alert("请先输入正确的密码");
                       return;
                     }
                     try {
