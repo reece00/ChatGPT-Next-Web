@@ -83,6 +83,10 @@ export const DEFAULT_MODELS = [
     available: true,
   },
   {
+    name: "gemini-3-flash-preview",
+    available: true,
+  },
+  {
     name: "grok-4",
     available: true,
   },
