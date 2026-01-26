@@ -95,7 +95,7 @@ export const DEFAULT_MODELS = [
     available: false,
   },
   {
-    name: "gpt-4",
+    name: "gpt-4o",
     available: true,
   },
 ] as const;
