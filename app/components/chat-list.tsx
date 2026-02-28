@@ -17,6 +17,7 @@ import { Path } from "../constant";
 import { Mask } from "../store/mask";
 import { useRef, useEffect, useMemo, useState } from "react";
 import { showConfirm } from "./ui-lib";
+import { useDebouncedCallback } from "use-debounce";
 
 import { useLocation } from "react-router-dom";
 
@@ -122,9 +123,14 @@ export function ChatList(props: { narrow?: boolean }) {
   const chatStore = useChatStore();
   const navigate = useNavigate();
 
+  const [queryInput, setQueryInput] = useState("");
   const [query, setQuery] = useState("");
+  const debouncedSetQuery = useDebouncedCallback((text: string) => {
+    setQuery(text);
+  }, 1000);
+
   const normalizedQuery = query.trim().toLowerCase();
-  const isSearching = normalizedQuery.length > 0;
+  const isSearching = normalizedQuery.length > 3;
 
   const filteredSessions = useMemo(() => {
     const indexed = sessions.map((session, originalIndex) => ({
@@ -175,8 +181,20 @@ export function ChatList(props: { narrow?: boolean }) {
                   type="text"
                   className={styles["chat-list-search-input"]}
                   placeholder={Locale.Home.SearchChat}
-                  value={query}
-                  onChange={(e) => setQuery(e.currentTarget.value)}
+                  value={queryInput}
+                  onChange={(e) => {
+                    const next = e.currentTarget.value;
+                    setQueryInput(next);
+
+                    const trimmedLen = next.trim().length;
+                    if (trimmedLen <= 3) {
+                      debouncedSetQuery.cancel();
+                      setQuery("");
+                      return;
+                    }
+
+                    debouncedSetQuery(next);
+                  }}
                 />
               </div>
             )}

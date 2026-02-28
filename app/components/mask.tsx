@@ -13,7 +13,12 @@ import EyeIcon from "../icons/eye.svg";
 import CopyIcon from "../icons/copy.svg";
 import DragIcon from "../icons/drag.svg";
 
-import { DEFAULT_MASK_AVATAR, Mask, useMaskStore } from "../store/mask";
+import {
+  DEFAULT_MASK_AVATAR,
+  Mask,
+  MaskLang,
+  useMaskStore,
+} from "../store/mask";
 import {
   ChatMessage,
   createMessage,
@@ -31,7 +36,7 @@ import {
   Select,
   showConfirm,
 } from "./ui-lib";
-import Locale, { AllLangs, ALL_LANG_OPTIONS, Lang } from "../locales";
+import Locale from "../locales";
 import { useNavigate } from "react-router-dom";
 
 import chatStyle from "./chat.module.scss";
@@ -56,6 +61,12 @@ function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
   result.splice(endIndex, 0, removed);
   return result;
 }
+
+const ALL_MASK_LANGS: MaskLang[] = ["cn", "en"];
+const MASK_LANG_OPTIONS: Record<MaskLang, string> = {
+  cn: "简体中文",
+  en: "English",
+};
 
 export function MaskConfig(props: {
   mask: Mask;
@@ -365,7 +376,7 @@ export function MaskPage() {
   const maskStore = useMaskStore();
   const chatStore = useChatStore();
 
-  const [filterLang, setFilterLang] = useState<Lang>();
+  const [filterLang, setFilterLang] = useState<MaskLang>();
 
   const allMasks = maskStore
     .getAll()
@@ -470,16 +481,16 @@ export function MaskPage() {
                 if (value === Locale.Settings.Lang.All) {
                   setFilterLang(undefined);
                 } else {
-                  setFilterLang(value as Lang);
+                  setFilterLang(value as MaskLang);
                 }
               }}
             >
               <option key="all" value={Locale.Settings.Lang.All}>
                 {Locale.Settings.Lang.All}
               </option>
-              {AllLangs.map((lang) => (
+              {ALL_MASK_LANGS.map((lang) => (
                 <option value={lang} key={lang}>
-                  {ALL_LANG_OPTIONS[lang]}
+                  {MASK_LANG_OPTIONS[lang]}
                 </option>
               ))}
             </Select>
@@ -505,7 +516,7 @@ export function MaskPage() {
                     <div className={styles["mask-name"]}>{m.name}</div>
                     <div className={styles["mask-info"] + " one-line"}>
                       {`${Locale.Mask.Item.Info(m.context.length)} / ${
-                        ALL_LANG_OPTIONS[m.lang]
+                        MASK_LANG_OPTIONS[m.lang]
                       } / ${m.modelConfig.model}`}
                     </div>
                   </div>

@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { BUILTIN_MASKS } from "../masks";
-import { getLang, Lang } from "../locales";
 import { DEFAULT_TOPIC, ChatMessage } from "./chat";
 import { ModelConfig, useAppConfig } from "./config";
 import { StoreKey } from "../constant";
 import { nanoid } from "nanoid";
+
+export type MaskLang = "cn" | "en";
 
 export type Mask = {
   id: string;
@@ -16,7 +17,7 @@ export type Mask = {
   context: ChatMessage[];
   syncGlobalConfig?: boolean;
   modelConfig: ModelConfig;
-  lang: Lang;
+  lang: MaskLang;
   builtin: boolean;
 };
 
@@ -43,10 +44,10 @@ export const createEmptyMask = () =>
     context: [],
     syncGlobalConfig: true, // use global config as default
     modelConfig: { ...useAppConfig.getState().modelConfig },
-    lang: getLang(),
+    lang: "cn",
     builtin: false,
     createdAt: Date.now(),
-  } as Mask);
+  }) as Mask;
 
 export const useMaskStore = create<MaskStore>()(
   persist(
@@ -99,7 +100,7 @@ export const useMaskStore = create<MaskStore>()(
                 ...config.modelConfig,
                 ...m.modelConfig,
               },
-            } as Mask),
+            }) as Mask,
         );
         return userMasks.concat(buildinMasks);
       },

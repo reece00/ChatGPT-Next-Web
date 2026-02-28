@@ -32,12 +32,7 @@ import {
   useAppConfig,
 } from "../store";
 
-import Locale, {
-  AllLangs,
-  ALL_LANG_OPTIONS,
-  changeLang,
-  getLang,
-} from "../locales";
+import Locale from "../locales";
 import { copyToClipboard } from "../utils";
 import Link from "next/link";
 import { Path, RELEASE_URL, UPDATE_URL } from "../constant";
@@ -397,21 +392,6 @@ export function Settings() {
               {Object.values(Theme).map((v) => (
                 <option value={v} key={v}>
                   {v}
-                </option>
-              ))}
-            </Select>
-          </ListItem>
-
-          <ListItem title={Locale.Settings.Lang.Name}>
-            <Select
-              value={getLang()}
-              onChange={(e) => {
-                changeLang(e.target.value as any);
-              }}
-            >
-              {AllLangs.map((lang) => (
-                <option value={lang} key={lang}>
-                  {ALL_LANG_OPTIONS[lang]}
                 </option>
               ))}
             </Select>
