@@ -122,6 +122,7 @@ const en: LocaleType = {
   },
   Home: {
     NewChat: "New Chat",
+    SearchChat: "Search Chats",
     DeleteChat: "Confirm to delete the selected conversation?",
     DeleteToast: "Chat Deleted",
     Revert: "Revert",

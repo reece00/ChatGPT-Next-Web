@@ -105,6 +105,7 @@ const bn: PartialLocaleType = {
   },
   Home: {
     NewChat: "নতুন চ্যাট",
+    SearchChat: "চ্যাট খুঁজুন",
     DeleteChat: "নির্বাচিত সংলাপটি মুছতে নিশ্চিত করুন?",
     DeleteToast: "চ্যাটটি মুছেছেন",
     Revert: "পুনরায়",

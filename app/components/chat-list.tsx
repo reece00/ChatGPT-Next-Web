@@ -15,7 +15,7 @@ import Locale from "../locales";
 import { Link, useNavigate } from "react-router-dom";
 import { Path } from "../constant";
 import { Mask } from "../store/mask";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
 import { showConfirm } from "./ui-lib";
 
 import { useLocation } from "react-router-dom";
@@ -31,6 +31,7 @@ export function ChatItem(props: {
   index: number;
   narrow?: boolean;
   mask: Mask;
+  dragDisabled?: boolean;
 }) {
   const draggableRef = useRef<HTMLDivElement | null>(null);
   /* useEffect(() => {
@@ -57,7 +58,11 @@ export function ChatItem(props: {
   }, [location]);
 
   return (
-    <Draggable draggableId={`${props.id}`} index={props.index}>
+    <Draggable
+      draggableId={`${props.id}`}
+      index={props.index}
+      isDragDisabled={props.dragDisabled}
+    >
       {(provided) => (
         <div
           className={`${styles["chat-item"]} ${
@@ -117,7 +122,29 @@ export function ChatList(props: { narrow?: boolean }) {
   const chatStore = useChatStore();
   const navigate = useNavigate();
 
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLowerCase();
+  const isSearching = normalizedQuery.length > 0;
+
+  const filteredSessions = useMemo(() => {
+    const indexed = sessions.map((session, originalIndex) => ({
+      session,
+      originalIndex,
+    }));
+
+    if (!isSearching) return indexed;
+
+    return indexed.filter(({ session }) => {
+      if (session.topic.toLowerCase().includes(normalizedQuery)) return true;
+      return session.messages.some((m) =>
+        (m.content ?? "").toLowerCase().includes(normalizedQuery),
+      );
+    });
+  }, [sessions, isSearching, normalizedQuery]);
+
   const onDragEnd: OnDragEndResponder = (result) => {
+    if (isSearching) return;
+
     const { destination, source } = result;
     if (!destination) {
       return;
@@ -142,15 +169,27 @@ export function ChatList(props: { narrow?: boolean }) {
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {sessions.map((item, i) => (
+            {!props.narrow && (
+              <div className={styles["chat-list-search"]}>
+                <input
+                  type="text"
+                  className={styles["chat-list-search-input"]}
+                  placeholder={Locale.Home.SearchChat}
+                  value={query}
+                  onChange={(e) => setQuery(e.currentTarget.value)}
+                />
+              </div>
+            )}
+
+            {filteredSessions.map(({ session, originalIndex }, i) => (
               <ChatItem
-                title={item.topic}
-                time={new Date(item.lastUpdate).toLocaleString()}
-                count={item.messages.length}
-                key={item.id}
-                id={item.id}
+                title={session.topic}
+                time={new Date(session.lastUpdate).toLocaleString()}
+                count={session.messages.length}
+                key={session.id}
+                id={session.id}
                 index={i}
-                selected={i === selectedIndex}
+                selected={originalIndex === selectedIndex}
                 onClick={() => {
                   console.log("储存滚动位置" + window.scrollY.toString());
                   sessionStorage.setItem(
@@ -158,18 +197,19 @@ export function ChatList(props: { narrow?: boolean }) {
                     window.scrollY.toString(),
                   );
                   navigate(Path.Chat);
-                  selectSession(i);
+                  selectSession(originalIndex);
                 }}
                 onDelete={async () => {
                   if (
                     !props.narrow ||
                     (await showConfirm(Locale.Home.DeleteChat))
                   ) {
-                    chatStore.deleteSession(i);
+                    chatStore.deleteSession(originalIndex);
                   }
                 }}
                 narrow={props.narrow}
-                mask={item.mask}
+                mask={session.mask}
+                dragDisabled={isSearching}
               />
             ))}
             {provided.placeholder}

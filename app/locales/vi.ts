@@ -54,6 +54,7 @@ const vi: PartialLocaleType = {
   },
   Home: {
     NewChat: "Cuộc trò chuyện mới",
+    SearchChat: "Tìm cuộc trò chuyện",
     DeleteChat: "Xác nhận xóa các cuộc trò chuyện đã chọn?",
     DeleteToast: "Đã xóa cuộc trò chuyện",
     Revert: "Khôi phục",

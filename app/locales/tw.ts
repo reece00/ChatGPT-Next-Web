@@ -52,6 +52,7 @@ const tw: PartialLocaleType = {
   },
   Home: {
     NewChat: "新的對話",
+    SearchChat: "搜尋對話",
     DeleteChat: "確定要刪除選取的對話嗎？",
     DeleteToast: "已刪除對話",
     Revert: "撤銷",

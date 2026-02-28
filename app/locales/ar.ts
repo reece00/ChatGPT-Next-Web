@@ -93,6 +93,7 @@ const ar: PartialLocaleType = {
   },
   Home: {
     NewChat: "دردشة جديدة",
+    SearchChat: "بحث في المحادثات",
     DeleteChat: "هل تريد تأكيد حذف المحادثة المحددة؟",
     DeleteToast: "تم حذف الدردشة",
     Revert: "التراجع",

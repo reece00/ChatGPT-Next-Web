@@ -54,6 +54,7 @@ const cs: PartialLocaleType = {
   },
   Home: {
     NewChat: "Nový chat",
+    SearchChat: "Hledat chaty",
     DeleteChat: "Potvrzujete smazání vybrané konverzace?",
     DeleteToast: "Chat smazán",
     Revert: "Zvrátit",

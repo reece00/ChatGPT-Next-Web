@@ -50,6 +50,7 @@ const no: PartialLocaleType = {
   },
   Home: {
     NewChat: "Ny chat",
+    SearchChat: "Søk i chatter",
     DeleteChat: "Bekreft for å slette det valgte dialogen",
     DeleteToast: "Samtale slettet",
     Revert: "Tilbakestill",
