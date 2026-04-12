@@ -17,7 +17,7 @@ import { Path } from "../constant";
 import { Mask } from "../store/mask";
 import { useRef, useEffect, useMemo, useState } from "react";
 import { showConfirm } from "./ui-lib";
-import { useDebouncedCallback } from "use-debounce";
+import { useDebounce } from "use-debounce";
 
 import { useLocation } from "react-router-dom";
 
@@ -124,13 +124,27 @@ export function ChatList(props: { narrow?: boolean }) {
   const navigate = useNavigate();
 
   const [queryInput, setQueryInput] = useState("");
+  const [debouncedQuery] = useDebounce(queryInput, 1000);
   const [query, setQuery] = useState("");
-  const debouncedSetQuery = useDebouncedCallback((text: string) => {
+  const [showSearchTips, setShowSearchTips] = useState(false);
+
+  const doSearch = (text: string) => {
     setQuery(text);
-  }, 1000);
+  };
+
+  useEffect(() => {
+    const trimmed = queryInput.trim();
+    if (trimmed.length > 3) {
+      setQuery(debouncedQuery);
+    } else if (trimmed.length === 0) {
+      setQuery("");
+    } else if (query !== "" && query !== queryInput) {
+      setQuery("");
+    }
+  }, [debouncedQuery, queryInput, query]);
 
   const normalizedQuery = query.trim().toLowerCase();
-  const isSearching = normalizedQuery.length > 3;
+  const isSearching = normalizedQuery.length > 0;
 
   const filteredSessions = useMemo(() => {
     const indexed = sessions.map((session, originalIndex) => ({
@@ -141,15 +155,21 @@ export function ChatList(props: { narrow?: boolean }) {
     if (!isSearching) return indexed;
 
     return indexed.filter(({ session }) => {
-      if (session.topic.toLowerCase().includes(normalizedQuery)) return true;
-      return session.messages.some((m) =>
-        (m.content ?? "").toLowerCase().includes(normalizedQuery),
-      );
+      const topic = (session.topic ?? "").toLowerCase();
+      if (topic.includes(normalizedQuery)) return true;
+      return session.messages.some((m) => {
+        const content = (m.content ?? "").toLowerCase();
+        return content.includes(normalizedQuery);
+      });
     });
   }, [sessions, isSearching, normalizedQuery]);
 
+  const isDragDisabled = useMemo(() => {
+    return queryInput.trim().length > 0;
+  }, [queryInput]);
+
   const onDragEnd: OnDragEndResponder = (result) => {
-    if (isSearching) return;
+    if (isDragDisabled) return;
 
     const { destination, source } = result;
     if (!destination) {
@@ -182,20 +202,30 @@ export function ChatList(props: { narrow?: boolean }) {
                   className={styles["chat-list-search-input"]}
                   placeholder={Locale.Home.SearchChat}
                   value={queryInput}
-                  onChange={(e) => {
-                    const next = e.currentTarget.value;
-                    setQueryInput(next);
-
-                    const trimmedLen = next.trim().length;
-                    if (trimmedLen <= 3) {
-                      debouncedSetQuery.cancel();
-                      setQuery("");
-                      return;
+                  onChange={(e) => setQueryInput(e.currentTarget.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      doSearch(queryInput);
                     }
-
-                    debouncedSetQuery(next);
                   }}
                 />
+                <div
+                  className={styles["chat-list-search-tips"] + " clickable"}
+                  onMouseEnter={() => setShowSearchTips(true)}
+                  onMouseLeave={() => setShowSearchTips(false)}
+                >
+                  ?
+                  {showSearchTips && (
+                    <div className={styles["search-tips-content"]}>
+                      <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
+                        搜索说明
+                      </div>
+                      <div>• 输入超过 3 个字：1秒后自动搜索</div>
+                      <div>• 输入 1-3 个字：按回车 (Enter) 搜索</div>
+                      <div>• 清空搜索框：恢复完整列表</div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -227,7 +257,7 @@ export function ChatList(props: { narrow?: boolean }) {
                 }}
                 narrow={props.narrow}
                 mask={session.mask}
-                dragDisabled={isSearching}
+                dragDisabled={isDragDisabled}
               />
             ))}
             {provided.placeholder}
