@@ -17,6 +17,7 @@ import { ChatControllerPool } from "../client/controller";
 import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
 import { nanoid } from "nanoid";
+import { AttachmentDB } from "../utils/idb";
 
 export type ChatMessage = RequestMessage & {
   date: string;
@@ -92,10 +93,19 @@ interface ChatStore {
   selectSession: (index: number) => void;
   newSession: (mask?: Mask) => void;
   deleteSession: (index: number) => void;
+  deleteMessage: (sessionIndex: number, messageId: string) => void;
+  deleteMessages: (
+    sessionIndex: number,
+    messageIds: string[],
+    preserveAttachments?: boolean,
+  ) => void;
   currentSession: () => ChatSession;
   nextSession: (delta: number) => void;
   onNewMessage: (message: ChatMessage) => void;
-  onUserInput: (content: string) => Promise<void>;
+  onUserInput: (
+    content: string,
+    attach?: { id: string; name: string; type: "text" | "image" },
+  ) => Promise<void>;
   summarizeSession: () => void;
   updateStat: (message: ChatMessage) => void;
   updateCurrentSession: (updater: (session: ChatSession) => void) => void;
@@ -145,6 +155,11 @@ export const useChatStore = create<ChatStore>()(
       currentSessionIndex: 0,
 
       clearSessions() {
+        get().sessions.forEach((s) => {
+          s.messages.forEach((m) => {
+            if (m.attachFileId) AttachmentDB.del(m.attachFileId);
+          });
+        });
         set(() => ({
           sessions: [createEmptySession()],
           currentSessionIndex: 0,
@@ -253,6 +268,35 @@ export const useChatStore = create<ChatStore>()(
           },
           5000,
         );
+
+        // cleanup attachments
+        deletedSession.messages.forEach((m) => {
+          if (m.attachFileId) AttachmentDB.del(m.attachFileId);
+        });
+      },
+
+      deleteMessage(sessionIndex, messageId) {
+        get().deleteMessages(sessionIndex, [messageId]);
+      },
+
+      deleteMessages(sessionIndex, messageIds, preserveAttachments = false) {
+        const sessions = get().sessions.slice();
+        const session = sessions[sessionIndex];
+        if (!session) return;
+
+        if (!preserveAttachments) {
+          messageIds.forEach((id) => {
+            const message = session.messages.find((m) => m.id === id);
+            if (message?.attachFileId) AttachmentDB.del(message.attachFileId);
+          });
+        }
+
+        sessions[sessionIndex] = {
+          ...session,
+          messages: session.messages.filter((m) => !messageIds.includes(m.id)),
+        };
+
+        set(() => ({ sessions }));
       },
 
       currentSession() {
@@ -278,7 +322,7 @@ export const useChatStore = create<ChatStore>()(
         get().summarizeSession();
       },
 
-      async onUserInput(content) {
+      async onUserInput(content, attach) {
         const session = get().currentSession();
         const modelConfig = session.mask.modelConfig;
 
@@ -288,6 +332,9 @@ export const useChatStore = create<ChatStore>()(
         const userMessage: ChatMessage = createMessage({
           role: "user",
           content: userContent,
+          attachFileId: attach?.id,
+          attachFileName: attach?.name,
+          attachFileType: attach?.type,
         });
 
         const botMessage: ChatMessage = createMessage({
@@ -468,15 +515,21 @@ export const useChatStore = create<ChatStore>()(
         messageIndex: number,
         updater: (message?: ChatMessage) => void,
       ) {
-        const sessions = get().sessions;
+        const sessions = get().sessions.slice();
         const session = sessions.at(sessionIndex);
-        const messages = session?.messages;
+        const messages = session?.messages.slice();
         updater(messages?.at(messageIndex));
+        if (session && messages) {
+          session.messages = messages;
+        }
         set(() => ({ sessions }));
       },
 
       resetSession() {
         get().updateCurrentSession((session) => {
+          session.messages.forEach((m) => {
+            if (m.attachFileId) AttachmentDB.del(m.attachFileId);
+          });
           session.messages = [];
           session.memoryPrompt = "";
         });
@@ -618,7 +671,8 @@ export const useChatStore = create<ChatStore>()(
         set(() => ({ sessions }));
       },
 
-      clearAllData() {
+      async clearAllData() {
+        await AttachmentDB.clear();
         localStorage.clear();
         location.reload();
       },

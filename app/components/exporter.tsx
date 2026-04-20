@@ -253,7 +253,7 @@ export function RenderExport(props: {
       return {
         id: i.toString(),
         role: role as any,
-        content: role === "user" ? v.textContent ?? "" : v.innerHTML,
+        content: role === "user" ? (v.textContent ?? "") : v.innerHTML,
         date: "",
       };
     });
@@ -493,6 +493,19 @@ export function ImagePreviewer(props: {
               <div className={styles["avatar"]}></div>
 
               <div className={styles["body"]}>
+                {m.attachFileName && (
+                  <div
+                    style={{
+                      padding: "5px 10px",
+                      background: "var(--second)",
+                      borderRadius: "5px",
+                      marginBottom: "5px",
+                      fontSize: 12,
+                    }}
+                  >
+                    [附件] {m.attachFileName}
+                  </div>
+                )}
                 <Markdown
                   content={m.content}
                   fontSize={config.fontSize}
@@ -515,9 +528,12 @@ export function MarkdownPreviewer(props: {
     `# ${props.topic}\n\n` +
     props.messages
       .map((m) => {
+        const attachStr = m.attachFileName
+          ? `\n[附件: ${m.attachFileName}]\n`
+          : "";
         return m.role === "user"
-          ? `## ${Locale.Export.MessageFromYou}:\n${m.content}`
-          : `## ${Locale.Export.MessageFromChatGPT}:\n${m.content.trim()}`;
+          ? `## ${Locale.Export.MessageFromYou}:\n${attachStr}${m.content}`
+          : `## ${Locale.Export.MessageFromChatGPT}:\n${attachStr}${m.content.trim()}`;
       })
       .join("\n\n");
 
@@ -549,6 +565,8 @@ export function JsonPreviewer(props: {
   const msgs = props.messages.map((m) => ({
     role: m.role,
     content: m.content,
+    attachFileName: m.attachFileName,
+    attachFileType: m.attachFileType,
   }));
   const mdText = "\n" + JSON.stringify(msgs, null, 2) + "\n";
 

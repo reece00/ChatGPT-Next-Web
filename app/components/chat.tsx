@@ -34,6 +34,7 @@ import AutoIcon from "../icons/auto.svg";
 import BottomIcon from "../icons/bottom.svg";
 import StopIcon from "../icons/pause.svg";
 import RobotIcon from "../icons/robot.svg";
+import UploadIcon from "../icons/upload.svg";
 
 import {
   ChatMessage,
@@ -87,6 +88,8 @@ import { ChatCommandPrefix, useChatCommand, useCommand } from "../command";
 import { prettyObject } from "../utils/format";
 import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
+import { AttachmentDB } from "../utils/idb";
+import { nanoid } from "nanoid";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
@@ -406,6 +409,8 @@ export function ChatActions(props: {
   scrollToBottom: () => void;
   showPromptHints: () => void;
   hitBottom: boolean;
+  onImageUpload?: () => void;
+  onTextUpload?: () => void;
 }) {
   const config = useAppConfig();
   const navigate = useNavigate();
@@ -439,6 +444,20 @@ export function ChatActions(props: {
 
   return (
     <div className={styles["chat-input-actions"]}>
+      {props.onImageUpload && (
+        <ChatAction
+          onClick={props.onImageUpload}
+          text="上传图片"
+          icon={<UploadIcon />}
+        />
+      )}
+      {props.onTextUpload && (
+        <ChatAction
+          onClick={props.onTextUpload}
+          text="上传文本"
+          icon={<UploadIcon />}
+        />
+      )}
       {couldStop && (
         <ChatAction
           onClick={stopAll}
@@ -604,6 +623,33 @@ export function EditMessageModal(props: { onClose: () => void }) {
   );
 }
 
+function ImageAttachment(props: { fileId: string }) {
+  const [url, setUrl] = useState<string>("");
+
+  useEffect(() => {
+    AttachmentDB.get(props.fileId).then((data) => {
+      if (data) setUrl(data);
+    });
+  }, [props.fileId]);
+
+  if (!url) return null;
+
+  return (
+    <div style={{ marginTop: 5, marginBottom: 5 }}>
+      <img
+        src={url}
+        style={{
+          maxWidth: 200,
+          maxHeight: 200,
+          borderRadius: 5,
+          cursor: "zoom-in",
+        }}
+        onClick={() => window.open(url, "_blank")}
+      />
+    </div>
+  );
+}
+
 function ChatInner() {
   type RenderMessage = ChatMessage & { preview?: boolean };
 
@@ -615,6 +661,75 @@ function ChatInner() {
   const [showExport, setShowExport] = useState(false);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [attachFile, setAttachFile] = useState<{
+    id: string;
+    name: string;
+    type: "text" | "image";
+  } | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const textInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = async () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      // 限制最大尺寸，防止超大图导致存储和 Token 溢出
+      const MAX_WIDTH = 1024;
+      const MAX_HEIGHT = 1024;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // 强制转换为标准的 jpeg 格式，质量设为 0.9
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+      const id = nanoid();
+      await AttachmentDB.set(id, dataUrl);
+      setAttachFile({
+        id,
+        name: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+        type: "image",
+      });
+      URL.revokeObjectURL(img.src);
+    };
+    e.target.value = "";
+  };
+
+  const handleTextUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const text = e.target?.result as string;
+      const id = nanoid();
+      await AttachmentDB.set(id, text);
+      setAttachFile({ id, name: file.name, type: "text" });
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
   const [userInput, setUserInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { submitKey, shouldSubmit } = useSubmitHandler();
@@ -699,7 +814,15 @@ function ChatInner() {
       return;
     }
     setIsLoading(true);
-    chatStore.onUserInput(userInput).then(() => setIsLoading(false));
+    chatStore
+      .onUserInput(
+        userInput,
+        attachFile
+          ? { id: attachFile.id, name: attachFile.name, type: attachFile.type }
+          : undefined,
+      )
+      .then(() => setIsLoading(false));
+    setAttachFile(null);
     localStorage.setItem(LAST_INPUT_KEY, userInput);
     setUserInput("");
     setPromptHints([]);
@@ -787,10 +910,9 @@ function ChatInner() {
   };
 
   const deleteMessage = (msgId?: string) => {
-    chatStore.updateCurrentSession(
-      (session) =>
-        (session.messages = session.messages.filter((m) => m.id !== msgId)),
-    );
+    if (msgId) {
+      chatStore.deleteMessage(chatStore.currentSessionIndex, msgId);
+    }
   };
 
   const onDelete = (msgId: string) => {
@@ -808,7 +930,7 @@ function ChatInner() {
       (m) => m.id === message.id,
     );
 
-    if (resendingIndex <= 0 || resendingIndex >= session.messages.length) {
+    if (resendingIndex < 0 || resendingIndex >= session.messages.length) {
       console.error("[Chat] failed to find resending message", message);
       return;
     }
@@ -837,13 +959,23 @@ function ChatInner() {
     }
 
     if (userMessage === undefined) {
+      if (Delete === 1) {
+        deleteMessage(message.id);
+        return;
+      }
       console.error("[Chat] failed to resend", message);
       return;
     }
 
     // delete the original messages
-    deleteMessage(userMessage.id);
-    deleteMessage(botMessage?.id);
+    const idsToDelete = [userMessage.id];
+    if (botMessage) idsToDelete.push(botMessage.id);
+    // preserve attachments when resending so the new message can use them
+    chatStore.deleteMessages(
+      chatStore.currentSessionIndex,
+      idsToDelete,
+      Delete !== 1,
+    );
 
     if (Delete == 1) {
       return;
@@ -851,7 +983,18 @@ function ChatInner() {
 
     // resend the message
     setIsLoading(true);
-    chatStore.onUserInput(userMessage.content).then(() => setIsLoading(false));
+    chatStore
+      .onUserInput(
+        userMessage.content,
+        userMessage.attachFileId
+          ? {
+              id: userMessage.attachFileId,
+              name: userMessage.attachFileName!,
+              type: userMessage.attachFileType as any,
+            }
+          : undefined,
+      )
+      .then(() => setIsLoading(false));
     inputRef.current?.focus();
   };
 
@@ -1127,6 +1270,24 @@ function ChatInner() {
                     </div>
                   )}
                   <div className={styles["chat-message-item"]}>
+                    {message.attachFileName && (
+                      <div
+                        style={{
+                          padding: "5px 10px",
+                          background: "var(--second)",
+                          borderRadius: "5px",
+                          marginBottom: "5px",
+                          fontSize: 12,
+                        }}
+                      >
+                        {message.attachFileType === "image" &&
+                        message.attachFileId ? (
+                          <ImageAttachment fileId={message.attachFileId} />
+                        ) : (
+                          `[附件] ${message.attachFileName}`
+                        )}
+                      </div>
+                    )}
                     <Markdown
                       content={message.content}
                       loading={
@@ -1231,6 +1392,8 @@ function ChatInner() {
         <PromptHints prompts={promptHints} onPromptSelect={onPromptSelect} />
 
         <ChatActions
+          onImageUpload={() => imageInputRef.current?.click()}
+          onTextUpload={() => textInputRef.current?.click()}
           showPromptModal={() => setShowPromptModal(true)}
           scrollToBottom={scrollToBottom}
           hitBottom={hitBottom}
@@ -1246,43 +1409,86 @@ function ChatInner() {
             onSearch("");
           }}
         />
-        <div className={styles["chat-input-panel-inner"]}>
-          <textarea
-            ref={inputRef}
-            className={styles["chat-input"]}
-            placeholder={Locale.Chat.Input(submitKey)}
-            onInput={(e) => onInput(e.currentTarget.value)}
-            value={userInput}
-            onKeyDown={onInputKeyDown}
-            onFocus={scrollToBottom}
-            onClick={scrollToBottom}
-            rows={inputRows}
-            autoFocus={autoFocus}
-            style={{
-              fontSize: config.fontSize,
-            }}
+        <div
+          className={styles["chat-input-panel-inner"]}
+          style={{ flexDirection: "column" }}
+        >
+          <input
+            type="file"
+            ref={imageInputRef}
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleImageUpload}
           />
-          <IconButton
-            icon={<SendWhiteIcon />}
-            text={Locale.Chat.Send}
-            className={styles["chat-input-send"]}
-            type="primary"
-            onClick={() => doSubmit(userInput)}
+          <input
+            type="file"
+            ref={textInputRef}
+            accept=".txt,.md,.json,.js,.csv"
+            style={{ display: "none" }}
+            onChange={handleTextUpload}
           />
-          {useMobileScreen() && (
-            <button
-              onClick={() => onInput("")}
+          {attachFile && (
+            <div
               style={{
-                height: "40px",
-                width: "90px",
-                marginRight: "20px",
-                marginTop: "10px",
-                marginLeft: "5px",
+                display: "flex",
+                alignItems: "center",
+                padding: "5px 10px",
+                background: "var(--second)",
+                borderRadius: "10px",
+                marginBottom: "10px",
+                width: "fit-content",
               }}
             >
-              清空
-            </button>
+              <span style={{ fontSize: 12, marginRight: 10 }}>
+                [附件] {attachFile.name}
+              </span>
+              <IconButton
+                icon={<DeleteIcon />}
+                onClick={() => setAttachFile(null)}
+              />
+            </div>
           )}
+          <div
+            style={{ display: "flex", width: "100%", alignItems: "flex-end" }}
+          >
+            <textarea
+              ref={inputRef}
+              className={styles["chat-input"]}
+              placeholder={Locale.Chat.Input(submitKey)}
+              onInput={(e) => onInput(e.currentTarget.value)}
+              value={userInput}
+              onKeyDown={onInputKeyDown}
+              onFocus={scrollToBottom}
+              onClick={scrollToBottom}
+              rows={inputRows}
+              autoFocus={autoFocus}
+              style={{
+                fontSize: config.fontSize,
+                flex: 1,
+              }}
+            />
+            <IconButton
+              icon={<SendWhiteIcon />}
+              text={Locale.Chat.Send}
+              className={styles["chat-input-send"]}
+              type="primary"
+              onClick={() => doSubmit(userInput)}
+            />
+            {useMobileScreen() && (
+              <button
+                onClick={() => onInput("")}
+                style={{
+                  height: "40px",
+                  width: "90px",
+                  marginRight: "20px",
+                  marginTop: "10px",
+                  marginLeft: "5px",
+                }}
+              >
+                清空
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

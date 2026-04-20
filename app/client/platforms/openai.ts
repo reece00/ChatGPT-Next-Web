@@ -14,6 +14,7 @@ import {
 } from "@fortaine/fetch-event-source";
 import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
+import { AttachmentDB } from "@/app/utils/idb";
 
 export interface OpenAIListModelResponse {
   object: string;
@@ -54,10 +55,34 @@ export class ChatGPTApi implements LLMApi {
   }
 
   async chat(options: ChatOptions) {
-    const messages = options.messages.map((v) => ({
-      role: v.role,
-      content: v.content,
-    }));
+    const messages = await Promise.all(
+      options.messages.map(async (v) => {
+        let content: any = v.content;
+        if (v.attachFileId) {
+          try {
+            const fileData = await AttachmentDB.get(v.attachFileId);
+            if (fileData) {
+              if (v.attachFileType === "text") {
+                content =
+                  content +
+                  `\n\n[File Content: ${v.attachFileName}]\n${fileData}`;
+              } else if (v.attachFileType === "image") {
+                content = [
+                  { type: "text", text: v.content || "请描述这张图片。" },
+                  { type: "image_url", image_url: { url: fileData } },
+                ];
+              }
+            }
+          } catch (e) {
+            console.error("[Request] failed to load attachment", e);
+          }
+        }
+        return {
+          role: v.role,
+          content: content,
+        };
+      }),
+    );
 
     const modelConfig = {
       ...useAppConfig.getState().modelConfig,

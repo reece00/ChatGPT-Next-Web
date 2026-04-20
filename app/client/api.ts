@@ -12,6 +12,9 @@ export type ChatModel = ModelType;
 export interface RequestMessage {
   role: MessageRole;
   content: string;
+  attachFileId?: string;
+  attachFileName?: string;
+  attachFileType?: "text" | "image";
 }
 
 export interface LLMConfig {
